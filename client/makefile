@@ -12,7 +12,7 @@
 # ------------------------------------------------
 
 # project name (generate executable with this name)
-TARGET   = exeFile
+TARGET   = moose
 
 CC       = g++
 # compiling flags here
