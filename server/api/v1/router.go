@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//NewRouter constructor
 func NewRouter() *mux.Router {
 
 	//display server header
@@ -29,7 +30,7 @@ func NewRouter() *mux.Router {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name, route.AuthRequired)
+		handler = MMiddleware(handler, route.Name, route.AuthRequired)
 
 		router.
 			Methods(route.Method).
