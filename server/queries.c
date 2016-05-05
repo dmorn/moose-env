@@ -1,3 +1,13 @@
+  
+public function getUser($uid)
+{
+"SELECT user_id, username, email, name, surname, balance, type, group_id FROM user WHERE user_id=".$uid;
+}
 
-char a[250];
-snprintf(a,250,"SELECT * FROM `group_items` WHERE group_id='%s' AND stock_id =%d AND category_id IN (SELECT category_id FROM category where isSubcategoryOf(category_id,%d)=1)",group_id,item_id,category_id);
+public function getCategoryObjects($cid){ //get all objects from this category and its subcategories
+"SELECT * FROM object WHERE category_id IN (SELECT category_id FROM category where isSubcategoryOf(category_id,".$cid.")=1)";
+}
+  
+public function getMainCategories(){	//get main categories
+"SELECT * FROM category where parent_id IS NULL";
+}
