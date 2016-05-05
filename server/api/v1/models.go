@@ -1,5 +1,8 @@
 package main
 
+import "database/sql"
+
+//BaseInfo that most models implement
 type BaseInfo struct {
 	Id          int    `json:"id"`
 	Description string `json:"description"`
@@ -7,18 +10,20 @@ type BaseInfo struct {
 }
 
 type User struct {
-	Id         int    `json:"id"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	Email      string `json:"email"`
-	Name       string `json:"name"`
-	Surname    string `json:"surname"`
-	Balance    int    `json:"balance"`
-	Type       int    `json:"type"`
-	VerifyCode string `json:"verify_code"`
-	Group
-	//Salt is missing
+	Id         int            `json:"id"`
+	Username   string         `json:"username"`
+	Password   string         `json:"password"`
+	Email      string         `json:"email"`
+	Name       string         `json:"name"`
+	Surname    string         `json:"surname"`
+	Balance    int            `json:"balance"`
+	Type       int            `json:"type"`
+	VerifyCode sql.NullString `json:"verify_code"`
+	GroupId    sql.NullString `json:"group_id"`
+	Salt       string         `json:"salt"`
 }
+
+type Users []User
 
 type StockTaker struct {
 	User
@@ -31,14 +36,33 @@ type Stock struct {
 	Location string `json:"location"`
 }
 
+type Stocks []Stock
+
 type Group struct {
 	BaseInfo
 }
+
+type Groups []Group
 
 type JSonErr struct {
 	Code int    `json:"code"`
 	Text string `json:"text"`
 }
+
+//Object is the abstraction of an Item
+type Object struct {
+	BaseInfo
+	CategoryId int `json:"category_id"`
+}
+
+type Objects []Object
+
+type Category struct {
+	BaseInfo
+	ParentId sql.NullInt64
+}
+
+type Categories []Category
 
 /*
 
