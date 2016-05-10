@@ -89,19 +89,24 @@ func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var object *Object
+	var objects *Objects
 	var err error
 
 	if objectID > 0 {
 		object, err = GetObject(objectID)
 	} else if categoryID > 0 {
-		object, err = GetObjectByCategory(categoryID)
+		objects, err = GetObjectByCategory(categoryID)
 	}
 
 	if err != nil {
 		http.Error(w, err.Error(), 404)
 	} else {
-		if object.Id > 0 {
+		if object != nil {
 			json.NewEncoder(w).Encode(object)
 		}
+		if objects != nil {
+			json.NewEncoder(w).Encode(objects)
+		}
+
 	}
 }

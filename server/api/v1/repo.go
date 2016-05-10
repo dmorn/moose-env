@@ -179,13 +179,23 @@ func GetObject(id int) (*Object, error) {
 	return &object, err
 }
 
-func GetObjectByCategory(categoryID int) (*Object, error) {
+func GetObjectByCategory(categoryID int) (*Objects, error) {
 
 	query := fmt.Sprintf("select object_id, name, description, category_id from object where category_id = %d", categoryID)
 
-	object := Object{}
-	err := db.QueryRow(query).
-		Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId)
+	objects := Objects{}
 
-	return &object, err
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		object := Object{}
+		if err := rows.Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId); err != nil {
+			return nil, err
+		}
+		objects = append(objects, object)
+	}
+	return &objects, err
 }
