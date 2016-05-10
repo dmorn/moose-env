@@ -74,20 +74,32 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	var objectId int
-	var err error
-	if objectId, err = strconv.Atoi(vars["object_id"]); err != nil {
-		log.Fatal(err)
+	var objectID int
+	var categoryID int
+
+	var err1 error
+	var err2 error
+
+	objectID, err1 = strconv.Atoi(vars["object_id"])
+	categoryID, err2 = strconv.Atoi(vars["category_id"])
+
+	if err1 != nil && err2 != nil {
+		log.Fatal(err1) //problem with the parameters
 		return
 	}
 
-	if object, err := GetObject(objectId); err != nil {
+	var object *Object
+	var err error
 
-		log.Fatal(err)
+	if objectID > 0 {
+		object, err = GetObject(objectID)
+	} else if categoryID > 0 {
+		object, err = GetObjectByCategory(categoryID)
+	}
+
+	if err != nil {
 		http.Error(w, err.Error(), 404)
-
 	} else {
-
 		if object.Id > 0 {
 			json.NewEncoder(w).Encode(object)
 		}

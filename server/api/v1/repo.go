@@ -54,7 +54,6 @@ func GetObjects() (*Objects, error) {
 		obj := Object{}
 
 		if err := rows.Scan(&obj.Id, &obj.Name, &obj.Description, &obj.CategoryId); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		objects = append(objects, obj)
@@ -77,7 +76,6 @@ func GetUsers() (*Users, error) {
 
 		if err := rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
 			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		users = append(users, user)
@@ -99,7 +97,6 @@ func GetCategories() (*Categories, error) {
 		cat := Category{}
 
 		if err := rows.Scan(&cat.Id, &cat.ParentId, &cat.Name, &cat.Description); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		cats = append(cats, cat)
@@ -121,7 +118,6 @@ func GetGroups() (*Groups, error) {
 		group := Group{}
 
 		if err := rows.Scan(&group.Id, &group.Name, &group.Description); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		groups = append(groups, group)
@@ -143,7 +139,6 @@ func GetStocks() (*Stocks, error) {
 		stock := Stock{}
 
 		if err := rows.Scan(&stock.Id, &stock.Name, &stock.Location); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		stocks = append(stocks, stock)
@@ -165,7 +160,6 @@ func GetItems() (*Items, error) {
 		item := Item{}
 
 		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId); err != nil {
-			log.Fatal(err)
 			return nil, err
 		}
 		items = append(items, item)
@@ -177,6 +171,17 @@ func GetItems() (*Items, error) {
 func GetObject(id int) (*Object, error) {
 
 	query := fmt.Sprintf("select object_id, name, description, category_id from object where object_id = %d", id)
+
+	object := Object{}
+	err := db.QueryRow(query).
+		Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId)
+
+	return &object, err
+}
+
+func GetObjectByCategory(categoryID int) (*Object, error) {
+
+	query := fmt.Sprintf("select object_id, name, description, category_id from object where category_id = %d", categoryID)
 
 	object := Object{}
 	err := db.QueryRow(query).
