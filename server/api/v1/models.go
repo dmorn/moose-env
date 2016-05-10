@@ -39,7 +39,9 @@ type Stock struct {
 type Stocks []Stock
 
 type Group struct {
-	BaseInfo
+	Id          string `json:"id"` //TODO: please change this into an integer id
+	Description string `json:"description"`
+	Name        string `json:"name"`
 }
 
 type Groups []Group
@@ -64,6 +66,17 @@ type Category struct {
 
 type Categories []Category
 
+type Item struct {
+	Id       int `json:"id"`
+	Status   int `json:"status"`
+	ObjectId int `json:"object_id"`
+	Coins    int `json:"coins"`
+	Quantity int `json:"quantity"`
+	StockId  int `json:"stock_id"`
+}
+
+type Items []Item
+
 /*
 
 
@@ -77,15 +90,7 @@ type Group struct {
 	Items []Item `json:"items"`
 }
 
-type Item struct {
-	BaseInfo
-	Category_id int    `json:"category_id"`
-	Coins       int    `json:"coins"`
-	Quantity    int    `json:"quantity"`
-	Stock_name  string `json:"stock_name"`
-	Group_id    int    `json:"group_id"`
-	Stock_id    int    `json:"stock_id"`
-}
+
 
 type Request struct {
 	Group_id int `json:"group_id"`

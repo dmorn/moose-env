@@ -55,4 +55,20 @@ var routes = Routes{
 		StocksHandler,
 		false,
 	},
+	Route{
+		"Items",
+		"GET",
+		"/items",
+		ItemsHandler,
+		false,
+	},
+
+	//specific routes
+	Route{
+		"Object",
+		"GET",
+		"/object/{object_id}",
+		ObjectHandler,
+		false,
+	},
 }

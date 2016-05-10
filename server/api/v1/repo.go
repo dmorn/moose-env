@@ -107,10 +107,9 @@ func GetCategories() (*Categories, error) {
 	return &cats, nil
 }
 
-//TODO: query does not work
 func GetGroups() (*Groups, error) {
 
-	const query = `select * from group;`
+	const query = "select * from `group`"
 	rows, err := db.Query(query)
 
 	if err != nil {
@@ -150,4 +149,38 @@ func GetStocks() (*Stocks, error) {
 		stocks = append(stocks, stock)
 	}
 	return &stocks, nil
+}
+
+func GetItems() (*Items, error) {
+
+	const query = `select * from item;`
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := Items{}
+	for rows.Next() {
+		item := Item{}
+
+		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId); err != nil {
+			log.Fatal(err)
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return &items, nil
+}
+
+//specific getters
+func GetObject(id int) (*Object, error) {
+
+	query := fmt.Sprintf("select object_id, name, description, category_id from object where object_id = %d", id)
+
+	object := Object{}
+	err := db.QueryRow(query).
+		Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId)
+
+	return &object, err
 }
