@@ -1,9 +1,12 @@
 #include<iostream>
+#include<restclient-cpp/restclient.h>
 
 using namespace std;
 int main() {
     
-    cout << "Hello Matthias" << endl;
+    RestClient::Response r = RestClient::get("http://localhost:8080/users");
+    cout << r.body << endl;
     
     return 0;
 }
+

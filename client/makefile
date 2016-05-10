@@ -13,14 +13,15 @@
 
 # project name (generate executable with this name)
 TARGET   = moose
-
 CC       = g++
+
 # compiling flags here
-CFLAGS   = 
+CFLAGS   += -I/usr/local/include
 
 LINKER   = g++ -o
+
 # linking flags here
-LFLAGS   = 
+LFLAGS   += -lrestclient-cpp -L/usr/local/lib
 
 # change these to set the proper directories where each files shoould be
 SRCDIR   = src
