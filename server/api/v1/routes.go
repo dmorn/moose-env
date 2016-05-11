@@ -67,14 +67,14 @@ var routes = Routes{
 	Route{
 		"Object",
 		"GET",
-		"/object/id={object_id}",
+		"/objects/id={object_id}",
 		ObjectHandler,
 		false,
 	},
 	Route{
 		"Object",
 		"GET",
-		"/object/cat={category_id}",
+		"/objects/cat={category_id}",
 		ObjectHandler,
 		false,
 	},
