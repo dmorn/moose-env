@@ -1,5 +1,5 @@
-#ifndef Gui_h
-#define Gui_h
+#ifndef gui_h
+#define gui_h
 #include<iostream>
 
 using namespace std;
