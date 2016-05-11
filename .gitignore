@@ -24,7 +24,7 @@
 *.lib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app
 
@@ -53,7 +53,7 @@ _cgo_export.*
 
 _testmain.go
 
-*.exe
+#*.exe
 *.test
 *.prof
 
