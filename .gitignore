@@ -59,3 +59,5 @@ _testmain.go
 
 #Other
 browse.VC.db
+*browse*
+*.env
