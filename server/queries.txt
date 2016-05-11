@@ -11,3 +11,6 @@ public function getCategoryObjects($cid){ //get all objects from this category a
 public function getMainCategories(){	//get main categories
 "SELECT * FROM category where parent_id IS NULL";
 }
+
+"INSERT INTO user (username,password,email,name,surname,salt) 
+						values('".$_POST["username"]."','".$pw."','".$_POST["email"]."','".$_POST["name"]."','".$_POST["surname"]."','".$salt."')";
