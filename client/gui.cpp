@@ -7,13 +7,16 @@ Gui::Gui(){
 	title="Test";
 }
 
-void Gui::addElement(string elem, string function)
+void Gui::addElement(string elem, string function, string param_1)
 {
 	if(elementCnt < MAX_ELEMENTS){
 		elements[elementCnt][0]=elem;
-		elements[elementCnt++][1]=function;
+		elements[elementCnt][1]=function;
+		elements[elementCnt][2]=param_1;
+		elementCnt++;
 	}
 }
+
 
 void Gui::clearElements()
 {
@@ -21,33 +24,30 @@ void Gui::clearElements()
 }
 
 void Gui::update(int keycode) {
-	//72 U , 75 L , 77 R, 80 D, 8 BACK, 13 ENTER
-	if(keycode == 72){
+	//65 U , 68 L , 67 R, 66 D, 127 BACK, 10 ENTER
+	if(keycode == 65){
 		selectedElement--;
 			if(selectedElement < 0)
 				selectedElement = elementCnt-1;
 	}	
-	else if(keycode == 80){
+	else if(keycode == 66){
 		selectedElement++;
 			if(selectedElement >= elementCnt)
 				selectedElement = 0;
 	}
-	else if(keycode == 8)
+	else if(keycode == 127)
 	{
 		mainMenu();
 		selectedElement=0;
 	}
-	else if(keycode == 13)
+	else if(keycode == 10)
 	{
-		selectedElement=0;
 		string func = elements[selectedElement][1];
-		
-		if(func == "show_main_menu") 
+		if(func == MAIN_MENU) 
 			mainMenu();
-		else if(func == "show_item_list") 
-			list(ITEM_LIST,0);
-		else if(func == "show_stock_list")
-			list(STOCK_LIST,0);
+		else 
+			list(func,stoi(elements[selectedElement][2]));
+		selectedElement=0;
 	}
 	print();
 }
@@ -55,32 +55,53 @@ void Gui::update(int keycode) {
 void Gui::mainMenu(){
 	
 	clearElements();
-   	addElement("Item list","show_item_list");
-   	addElement("Stock list","show_stock_list");
+   	addElement("Item list",ITEM_LIST,"0");
+   	addElement("Stock list",STOCK_LIST,"0");
    	print();
 }
 
-void Gui::list(int type, int page){
+void Gui::list(string type, int page){
 	
 	clearElements();
 	if(type == ITEM_LIST){
-	   	addElement("Item","show_stock_list");
-	   	addElement("Item","show_stock_list");
-	   	addElement("Item","show_stock_list");
-	   	addElement("Item","show_stock_list");
+
+	 	auto response = cpr::Get(cpr::Url{"http://localhost:8080/objects"});
+		auto json = nlohmann::json::parse(response.text);
+		
+		int cnt=0;
+		for (auto& item : json) {
+			if(cnt>=(page*(MAX_ELEMENTS-1)))
+	   			addElement(item["name"],SHOW_ITEM,to_string((int)item["id"]));
+			cnt++;
+			if(cnt>=((page+1)*(MAX_ELEMENTS-1))) {
+				string text = "...To page ";
+				text += to_string(page+1);
+				text += "-->";
+	   			addElement(text,ITEM_LIST,to_string(page+1));
+				break;
+			}
+			
+		}
+		if(page > 0){
+			string text = "<--To page ";
+			text += to_string(page-1);
+			text += "...";
+   			addElement(text,ITEM_LIST,to_string(page-1));
+		}
 	}	
 	else if(type == STOCK_LIST){
-	   	addElement("Stock","show_stock_list");
-	   	addElement("Stock","show_stock_list");
-	   	addElement("Stock","show_stock_list");
-	   	addElement("Stock","show_stock_list");
+	   	addElement("Stock",STOCK_LIST,"0");
+	   	addElement("Stock",STOCK_LIST,"0");
+	   	addElement("Stock",STOCK_LIST,"0");
+	   	addElement("Stock",STOCK_LIST,"0");
 	}
    	print();
 }
 
 void Gui::print() {
 	
-  	system("cls");
+    std::system("clear");	   
+
     cout << "------------------------------------------------------------------" << endl;
     cout << "\t" + title << endl;
     cout << "------------------------------------------------------------------" << endl;
@@ -89,15 +110,11 @@ void Gui::print() {
 	{
 		if(i==selectedElement)
 		{
-			cout << ">|-";
-			cout << i;
-    		cout << "-| " + elements[i][0] << endl;
+			cout << "|X| " + elements[i][0] << endl;
 		}
 		else
 		{
-			cout << "| ";
-			cout << i;
-    		cout << " | " + elements[i][0] << endl;
+			cout << "| | " + elements[i][0] << endl;
 		}
 	}
 	

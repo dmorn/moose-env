@@ -148,61 +148,61 @@ vector
 cprtypes.h
 ../opt/cpr/include/cpr/cprtypes.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/auth.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/auth.cpp
 cpr/auth.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/auth.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/auth.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cookies.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cookies.cpp
 cpr/cookies.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/cookies.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/cookies.h
 cpr/util.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/util.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/util.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cprtypes.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cprtypes.cpp
 cpr/cprtypes.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/cprtypes.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/cprtypes.h
 algorithm
 -
 cctype
 -
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/digest.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/digest.cpp
 cpr/digest.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/digest.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/digest.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/error.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/error.cpp
 cpr/error.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/error.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/error.h
 curl/curl.h
 -
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/multipart.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/multipart.cpp
 cpr/multipart.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/multipart.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/multipart.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/parameters.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/parameters.cpp
 cpr/parameters.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/parameters.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/parameters.h
 initializer_list
 -
 string
 -
 cpr/util.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/util.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/util.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/payload.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/payload.cpp
 cpr/payload.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/payload.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/payload.h
 initializer_list
 -
 string
 -
 cpr/util.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/util.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/util.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/proxies.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/proxies.cpp
 cpr/proxies.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/proxies.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/proxies.h
 initializer_list
 -
 map
@@ -212,9 +212,9 @@ string
 utility
 -
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/session.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/session.cpp
 cpr/session.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/session.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/session.h
 algorithm
 -
 functional
@@ -224,13 +224,13 @@ string
 curl/curl.h
 -
 cpr/curlholder.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/curlholder.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/curlholder.h
 cpr/util.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/util.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/util.h
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/util.cpp
+/home/chef/Git/moose-env/client/opt/cpr/cpr/util.cpp
 cpr/util.h
-/Users/danielmorandini/Code/yoloP/moose-env/client/opt/cpr/cpr/cpr/util.h
+/home/chef/Git/moose-env/client/opt/cpr/cpr/cpr/util.h
 cctype
 -
 iomanip

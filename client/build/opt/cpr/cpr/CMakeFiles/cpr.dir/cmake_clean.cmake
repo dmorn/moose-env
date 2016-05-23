@@ -1,4 +1,4 @@
-file(REMOVE_RECURSE
+FILE(REMOVE_RECURSE
   "CMakeFiles/cpr.dir/auth.cpp.o"
   "CMakeFiles/cpr.dir/cookies.cpp.o"
   "CMakeFiles/cpr.dir/cprtypes.cpp.o"
@@ -15,6 +15,6 @@ file(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-foreach(lang CXX)
-  include(CMakeFiles/cpr.dir/cmake_clean_${lang}.cmake OPTIONAL)
-endforeach()
+FOREACH(lang CXX)
+  INCLUDE(CMakeFiles/cpr.dir/cmake_clean_${lang}.cmake OPTIONAL)
+ENDFOREACH(lang)

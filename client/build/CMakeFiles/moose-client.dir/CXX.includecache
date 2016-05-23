@@ -212,11 +212,25 @@ sys/types.h
 basetsd.h
 -
 
-/Users/danielmorandini/Code/yoloP/moose-env/client/main.cpp
+/home/chef/Git/moose-env/client/gui.cpp
+gui.h
+/home/chef/Git/moose-env/client/gui.h
+
+/home/chef/Git/moose-env/client/gui.h
 iostream
 -
 cpr/cpr.h
 -
 json.hpp
 -
+
+/home/chef/Git/moose-env/client/main.cpp
+iostream
+-
+unistd.h
+-
+termios.h
+-
+gui.h
+/home/chef/Git/moose-env/client/gui.h
 
