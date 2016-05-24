@@ -55,6 +55,7 @@ type JSonErr struct {
 type Object struct {
 	BaseInfo
 	CategoryId int `json:"category_id"`
+	*Category  `json:"category"`
 }
 
 type Objects []Object

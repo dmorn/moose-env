@@ -56,6 +56,7 @@ func GetObjects() (*Objects, error) {
 		if err := rows.Scan(&obj.Id, &obj.Name, &obj.Description, &obj.CategoryId); err != nil {
 			return nil, err
 		}
+		obj.Category, _ = GetCategory(obj.CategoryId)
 		objects = append(objects, obj)
 	}
 	return &objects, nil
@@ -176,6 +177,10 @@ func GetObject(id int) (*Object, error) {
 	err := db.QueryRow(query).
 		Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId)
 
+	if err != nil {
+		return nil, err
+	}
+	object.Category, err = GetCategory(object.CategoryId)
 	return &object, err
 }
 
@@ -195,9 +200,21 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 		if err := rows.Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId); err != nil {
 			return nil, err
 		}
+		object.Category, _ = GetCategory(object.CategoryId)
 		objects = append(objects, object)
 	}
 	return &objects, err
+}
+
+func GetCategory(id int) (*Category, error) {
+
+	query := fmt.Sprintf("select category_id, parent_id, name, description from category where category_id = %d", id)
+
+	cat := Category{}
+	err := db.QueryRow(query).
+		Scan(&cat.Id, &cat.ParentId, &cat.Name, &cat.Description)
+
+	return &cat, err
 }
 
 func GetItem(id int) (*Item, error) {

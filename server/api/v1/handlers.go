@@ -130,6 +130,27 @@ func ItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CategoryHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var catID int
+	var cat *Category
+	var err error
+
+	catID, err = strconv.Atoi(vars["category_id"])
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if cat, err = GetCategory(catID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(cat)
+	}
+}
+
 //post handlers
 
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
