@@ -36,7 +36,7 @@ func connectToDatabse() {
 	}
 }
 
-//Getters
+//GET
 func GetObjects() (*Objects, error) {
 
 	const query = `select * from object;`
@@ -163,6 +163,7 @@ func GetItems() (*Items, error) {
 		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId); err != nil {
 			return nil, err
 		}
+		item.Object, _ = GetObject(item.ObjectId)
 		items = append(items, item)
 	}
 	return &items, nil
@@ -234,8 +235,9 @@ func GetItem(id int) (*Item, error) {
 	return &item, err
 }
 
-//post
+//POST
 
+//for testing
 //curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObject(object *Object) error {
 
