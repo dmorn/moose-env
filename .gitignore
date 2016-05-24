@@ -29,6 +29,7 @@
 *.app
 
 *.vscode
+client/build
 
 #GO
 # Compiled Object files, Static and Dynamic libs (Shared Objects)

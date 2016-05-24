@@ -73,6 +73,7 @@ type Item struct {
 	Coins    int `json:"coins"`
 	Quantity int `json:"quantity"`
 	StockId  int `json:"stock_id"`
+	*Object  `json:"object"`
 }
 
 type Items []Item

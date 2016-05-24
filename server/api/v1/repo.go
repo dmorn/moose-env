@@ -199,3 +199,20 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 	}
 	return &objects, err
 }
+
+func GetItem(id int) (*Item, error) {
+
+	query := fmt.Sprintf("select item_id, coins, status, quantity, object_id, stock_id from item where item_id = %d", id)
+
+	item := Item{}
+
+	err := db.QueryRow(query).
+		Scan(&item.Id, &item.Status, &item.ObjectId, &item.Coins, &item.Quantity, &item.StockId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	item.Object, err = GetObject(item.ObjectId)
+	return &item, err
+}

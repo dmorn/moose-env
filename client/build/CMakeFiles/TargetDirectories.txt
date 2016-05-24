@@ -1,2 +1,0 @@
-/home/chef/Git/moose-env/client/build/opt/cpr/cpr/CMakeFiles/cpr.dir
-/home/chef/Git/moose-env/client/build/CMakeFiles/moose-client.dir
