@@ -129,3 +129,43 @@ func ItemHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(item)
 	}
 }
+
+//post handlers
+
+func PostItemHandler(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var item *Item
+	err := decoder.Decode(&item)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if err = PostItem(item); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		items, _ := GetItems()
+		json.NewEncoder(w).Encode(items) //should return 201
+	}
+}
+
+func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var object *Object
+	err := decoder.Decode(&object)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if err = PostObject(object); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		objects, _ := GetObjects()
+		json.NewEncoder(w).Encode(objects) //should return 201
+	}
+}

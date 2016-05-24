@@ -85,4 +85,20 @@ var routes = Routes{
 		ItemHandler,
 		false,
 	},
+
+	//posts
+	Route{
+		"Object",
+		"POST",
+		"/object",
+		PostObjectHandler,
+		false,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/item",
+		PostItemHandler,
+		false,
+	},
 }

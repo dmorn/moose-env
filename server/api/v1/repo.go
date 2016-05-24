@@ -207,7 +207,7 @@ func GetItem(id int) (*Item, error) {
 	item := Item{}
 
 	err := db.QueryRow(query).
-		Scan(&item.Id, &item.Status, &item.ObjectId, &item.Coins, &item.Quantity, &item.StockId)
+		Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId)
 
 	if err != nil {
 		return nil, err
@@ -215,4 +215,25 @@ func GetItem(id int) (*Item, error) {
 
 	item.Object, err = GetObject(item.ObjectId)
 	return &item, err
+}
+
+//post
+func PostObject(object *Object) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `object` (`object_id`, `name`, `description`, `category_id`) VALUES (%d, %s, %s, %d);",
+		object.Id, object.Name, object.Description, object.CategoryId)
+
+	_, err := db.Query(query)
+	return err
+}
+
+func PostItem(item *Item) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,%d,%d);",
+		item.Id, item.Coins, item.Status, item.Quantity, item.ObjectId, item.StockId)
+
+	_, err := db.Query(query)
+	return err
 }
