@@ -218,12 +218,15 @@ func GetItem(id int) (*Item, error) {
 }
 
 //post
+
+//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObject(object *Object) error {
 
 	query := fmt.
-		Sprintf("INSERT INTO `object` (`object_id`, `name`, `description`, `category_id`) VALUES (%d, %s, %s, %d);",
-		object.Id, object.Name, object.Description, object.CategoryId)
+		Sprintf("INSERT INTO `object` (`name`, `description`, `category_id`) VALUES ('%s', '%s', %d);",
+		object.Name, object.Description, object.CategoryId)
 
+	fmt.Println(query)
 	_, err := db.Query(query)
 	return err
 }
