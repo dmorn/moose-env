@@ -293,3 +293,35 @@ make[1]: Leaving directory `/home/chef/Git/moose-env/client/build/CMakeFiles/CMa
 
 Source file was:
 int main() { return 0;}
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_CXX11 succeded with the following output:
+Change Dir: /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec2425721504/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec2425721504.dir/build.make CMakeFiles/cmTryCompileExec2425721504.dir/build
+make[1]: Entering directory `/home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec2425721504.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX11   -std=c++11 -o CMakeFiles/cmTryCompileExec2425721504.dir/src.cxx.o -c /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTryCompileExec2425721504
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec2425721504.dir/link.txt --verbose=1
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX11    CMakeFiles/cmTryCompileExec2425721504.dir/src.cxx.o  -o cmTryCompileExec2425721504 -rdynamic 
+make[1]: Leaving directory `/home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp'
+
+Source file was:
+int main() { return 0;}
+Performing C++ SOURCE FILE Test COMPILER_SUPPORTS_CXX0X succeded with the following output:
+Change Dir: /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp
+
+Run Build Command:/usr/bin/make "cmTryCompileExec734406975/fast"
+/usr/bin/make -f CMakeFiles/cmTryCompileExec734406975.dir/build.make CMakeFiles/cmTryCompileExec734406975.dir/build
+make[1]: Entering directory `/home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp'
+/usr/bin/cmake -E cmake_progress_report /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec734406975.dir/src.cxx.o
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX0X   -std=c++0x -o CMakeFiles/cmTryCompileExec734406975.dir/src.cxx.o -c /home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTryCompileExec734406975
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTryCompileExec734406975.dir/link.txt --verbose=1
+/usr/bin/c++    -DCOMPILER_SUPPORTS_CXX0X    CMakeFiles/cmTryCompileExec734406975.dir/src.cxx.o  -o cmTryCompileExec734406975 -rdynamic 
+make[1]: Leaving directory `/home/chef/Git/moose-env/client/build/CMakeFiles/CMakeTmp'
+
+Source file was:
+int main() { return 0;}

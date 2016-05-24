@@ -78,4 +78,11 @@ var routes = Routes{
 		ObjectHandler,
 		false,
 	},
+	Route{
+		"Item",
+		"GET",
+		"/items/id={item_id}",
+		ItemHandler,
+		false,
+	},
 }

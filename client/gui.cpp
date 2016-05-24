@@ -82,8 +82,12 @@ void Gui::list(string type, int page){
 		
 		int cnt=0;
 		for (auto& item : items) {
-			if(cnt>=(page*(MAX_ELEMENTS-2)))
-	   			addElement(to_string((int)item["id"]),ITEM_PAGE,to_string((int)item["id"]));
+			if(cnt>=(page*(MAX_ELEMENTS-2))){
+				nlohmann::json object = item["object"];
+				cout << object["name"];
+	   			//addElement(object["name"],ITEM_PAGE,to_string((int)item["id"]));
+
+			}
 			if((cnt+1)>=((page+1)*(MAX_ELEMENTS-2))) {
 	   			addElement("...To page " + to_string(page+1) + "-->",ITEM_LIST,to_string(page+1));
 				break;
@@ -109,7 +113,7 @@ void Gui::list(string type, int page){
 
 void Gui::print() {
 	
-    std::system("clear");	   
+    //std::system("clear");	   
 
     cout << "------------------------------------------------------------------" << endl;
     cout << "\t" + title << endl;

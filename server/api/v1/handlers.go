@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -84,7 +83,7 @@ func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 	categoryID, err2 = strconv.Atoi(vars["category_id"])
 
 	if err1 != nil && err2 != nil {
-		log.Fatal(err1) //problem with the parameters
+		http.Error(w, err1.Error(), 500)
 		return
 	}
 
@@ -107,6 +106,26 @@ func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 		if objects != nil {
 			json.NewEncoder(w).Encode(objects)
 		}
+	}
+}
 
+func ItemHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	var itemID int
+	var item *Item
+	var err error
+
+	itemID, err = strconv.Atoi(vars["item_id"])
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if item, err = GetItem(itemID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(item)
 	}
 }

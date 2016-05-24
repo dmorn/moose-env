@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11    CMakeFiles/moose-client.dir/main.cpp.o CMakeFiles/moose-client.dir/gui.cpp.o  -o moose-client -rdynamic lib/libcpr.a -lcurl 
