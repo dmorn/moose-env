@@ -36,7 +36,7 @@ func connectToDatabse() {
 	}
 }
 
-//Getters
+//GET
 func GetObjects() (*Objects, error) {
 
 	const query = `select * from object;`
@@ -56,6 +56,7 @@ func GetObjects() (*Objects, error) {
 		if err := rows.Scan(&obj.Id, &obj.Name, &obj.Description, &obj.CategoryId); err != nil {
 			return nil, err
 		}
+		obj.Category, _ = GetCategory(obj.CategoryId)
 		objects = append(objects, obj)
 	}
 	return &objects, nil
@@ -162,6 +163,7 @@ func GetItems() (*Items, error) {
 		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId); err != nil {
 			return nil, err
 		}
+		item.Object, _ = GetObject(item.ObjectId)
 		items = append(items, item)
 	}
 	return &items, nil
@@ -176,6 +178,10 @@ func GetObject(id int) (*Object, error) {
 	err := db.QueryRow(query).
 		Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId)
 
+	if err != nil {
+		return nil, err
+	}
+	object.Category, err = GetCategory(object.CategoryId)
 	return &object, err
 }
 
@@ -195,9 +201,21 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 		if err := rows.Scan(&object.Id, &object.Name, &object.Description, &object.CategoryId); err != nil {
 			return nil, err
 		}
+		object.Category, _ = GetCategory(object.CategoryId)
 		objects = append(objects, object)
 	}
 	return &objects, err
+}
+
+func GetCategory(id int) (*Category, error) {
+
+	query := fmt.Sprintf("select category_id, parent_id, name, description from category where category_id = %d", id)
+
+	cat := Category{}
+	err := db.QueryRow(query).
+		Scan(&cat.Id, &cat.ParentId, &cat.Name, &cat.Description)
+
+	return &cat, err
 }
 
 func GetItem(id int) (*Item, error) {
@@ -207,7 +225,7 @@ func GetItem(id int) (*Item, error) {
 	item := Item{}
 
 	err := db.QueryRow(query).
-		Scan(&item.Id, &item.Status, &item.ObjectId, &item.Coins, &item.Quantity, &item.StockId)
+		Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId)
 
 	if err != nil {
 		return nil, err
@@ -215,4 +233,29 @@ func GetItem(id int) (*Item, error) {
 
 	item.Object, err = GetObject(item.ObjectId)
 	return &item, err
+}
+
+//POST
+
+//for testing
+//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
+func PostObject(object *Object) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `object` (`name`, `description`, `category_id`) VALUES ('%s', '%s', %d);",
+		object.Name, object.Description, object.CategoryId)
+
+	fmt.Println(query)
+	_, err := db.Query(query)
+	return err
+}
+
+func PostItem(item *Item) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,%d,%d);",
+		item.Id, item.Coins, item.Status, item.Quantity, item.ObjectId, item.StockId)
+
+	_, err := db.Query(query)
+	return err
 }

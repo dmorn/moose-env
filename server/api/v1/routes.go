@@ -85,4 +85,27 @@ var routes = Routes{
 		ItemHandler,
 		false,
 	},
+	Route{
+		"Category",
+		"GET",
+		"/categories/id={category_id}",
+		CategoryHandler,
+		false,
+	},
+
+	//posts
+	Route{
+		"Object",
+		"POST",
+		"/object",
+		PostObjectHandler,
+		false,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/item",
+		PostItemHandler,
+		false,
+	},
 }
