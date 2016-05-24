@@ -7,11 +7,11 @@
 using namespace std;
 class Gui{
 	
-	#define MAX_ELEMENTS 4
+	#define MAX_ELEMENTS 12
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define STOCK_LIST "SSL"
-	#define SHOW_ITEM "SIT"
+	#define ITEM_PAGE "SIP"
 
 	public:
 		Gui();
@@ -23,6 +23,7 @@ class Gui{
 		
 	private:
 		void list(string type, int page);
+		void itemPage(string id);
 		string title;
 		string elements[MAX_ELEMENTS][10];
 		int elementCnt;

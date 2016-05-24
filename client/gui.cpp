@@ -37,14 +37,18 @@ void Gui::update(int keycode) {
 	}
 	else if(keycode == 127)
 	{
+		clearElements();
 		mainMenu();
 		selectedElement=0;
 	}
 	else if(keycode == 10)
 	{
+		clearElements();
 		string func = elements[selectedElement][1];
 		if(func == MAIN_MENU) 
 			mainMenu();
+		else if(func == ITEM_PAGE)
+			itemPage(elements[selectedElement][2]);
 		else 
 			list(func,stoi(elements[selectedElement][2]));
 		selectedElement=0;
@@ -54,32 +58,37 @@ void Gui::update(int keycode) {
 
 void Gui::mainMenu(){
 	
-	clearElements();
+	title = "Moose Environment";
    	addElement("Item list",ITEM_LIST,"0");
    	addElement("Stock list",STOCK_LIST,"0");
-   	print();
+}
+
+void Gui::itemPage(string id){
+	
+	title = "Item nr."+id;
+	auto response = cpr::Get(cpr::Url{"http://localhost:8080/objects/id="+id});
+	auto item = nlohmann::json::parse(response.text);
+	addElement(item["name"],"nil","1");
+	addElement(item["description"],"nil","1");
+	addElement(item["description"],"nil","1");
 }
 
 void Gui::list(string type, int page){
 	
-	clearElements();
 	if(type == ITEM_LIST){
-
-	 	auto response = cpr::Get(cpr::Url{"http://localhost:8080/objects"});
-		auto json = nlohmann::json::parse(response.text);
+		title = "Items - Page "+to_string(page);
+	 	auto response = cpr::Get(cpr::Url{"http://localhost:8080/items"});
+		auto items = nlohmann::json::parse(response.text);
 		
 		int cnt=0;
-		for (auto& item : json) {
-			if(cnt>=(page*(MAX_ELEMENTS-1)))
-	   			addElement(item["name"],SHOW_ITEM,to_string((int)item["id"]));
-			cnt++;
-			if(cnt>=((page+1)*(MAX_ELEMENTS-1))) {
-				string text = "...To page ";
-				text += to_string(page+1);
-				text += "-->";
-	   			addElement(text,ITEM_LIST,to_string(page+1));
+		for (auto& item : items) {
+			if(cnt>=(page*(MAX_ELEMENTS-2)))
+	   			addElement(to_string((int)item["id"]),ITEM_PAGE,to_string((int)item["id"]));
+			if((cnt+1)>=((page+1)*(MAX_ELEMENTS-2))) {
+	   			addElement("...To page " + to_string(page+1) + "-->",ITEM_LIST,to_string(page+1));
 				break;
 			}
+			cnt++;
 			
 		}
 		if(page > 0){
@@ -90,12 +99,12 @@ void Gui::list(string type, int page){
 		}
 	}	
 	else if(type == STOCK_LIST){
+		title = "Stocks - Page "+page;
 	   	addElement("Stock",STOCK_LIST,"0");
 	   	addElement("Stock",STOCK_LIST,"0");
 	   	addElement("Stock",STOCK_LIST,"0");
 	   	addElement("Stock",STOCK_LIST,"0");
 	}
-   	print();
 }
 
 void Gui::print() {
