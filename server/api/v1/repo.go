@@ -195,6 +195,7 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		object := Object{}
@@ -216,6 +217,25 @@ func GetCategory(id int) (*Category, error) {
 		Scan(&cat.Id, &cat.ParentId, &cat.Name, &cat.Description)
 
 	return &cat, err
+}
+
+func GetCategoriesWithSubcategories(id int) (*Categories, error) {
+
+	query := fmt.Sprintf("select * from category where isSubCategoryOf(category_id, %d) = 1", id)
+
+	categories := Categories{}
+
+	rows, err := db.Query(query)
+
+	for rows.Next() {
+		category := Category{}
+
+		if err := rows.Scan(&category.Id, &category.ParentId, &category.Name, &category.Description); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+	return &categories, err
 }
 
 func GetItem(id int) (*Item, error) {

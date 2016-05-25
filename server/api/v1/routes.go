@@ -92,6 +92,13 @@ var routes = Routes{
 		CategoryHandler,
 		false,
 	},
+	Route{
+		"Categories",
+		"GET",
+		"/categories/start_id={category_id}",
+		CategoriesWithSubcategoriesHandeler,
+		false,
+	},
 
 	//posts
 	Route{
