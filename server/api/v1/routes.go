@@ -99,6 +99,13 @@ var routes = Routes{
 		CategoriesWithSubcategoriesHandeler,
 		false,
 	},
+	Route{
+		"Categories",
+		"GET",
+		"/categories/parent_id={parent_id}",
+		CategoriesWithParentHandler,
+		false,
+	},
 
 	//posts
 	Route{
