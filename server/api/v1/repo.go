@@ -222,6 +222,29 @@ func GetCategory(id int) (*Category, error) {
 func GetCategoriesWithSubcategories(id int) (*Categories, error) {
 
 	query := fmt.Sprintf("select * from category where isSubCategoryOf(category_id, %d) = 1", id)
+	categories := Categories{}
+
+	rows, err := db.Query(query)
+
+	for rows.Next() {
+		category := Category{}
+
+		if err := rows.Scan(&category.Id, &category.ParentId, &category.Name, &category.Description); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+	return &categories, err
+}
+
+func GetCategoriesWithParent(id int) (*Categories, error) {
+
+	var query string
+	if id == 0 {
+		query = "select * from category where parent_id IS NULL"
+	} else {
+		query = fmt.Sprintf("select * from category where parent_id = %d", id)
+	}
 
 	categories := Categories{}
 
