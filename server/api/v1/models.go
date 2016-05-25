@@ -62,7 +62,7 @@ type Objects []Object
 
 type Category struct {
 	BaseInfo
-	ParentId sql.NullInt64
+	ParentId sql.NullInt64 `json:"parent_id"`
 }
 
 type Categories []Category
