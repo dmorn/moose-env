@@ -2,36 +2,37 @@
 
 Gui::Gui(){
 	
-	elementCnt=0;
-	selectedElement=0;
-	tmpSelectedElement=-1;
+	menuItemCnt=0;
+	selectedMenuItem=0;
+	tmpSelectedMenuItem=-1;
 	page=0;
 	title="Test";
 	currMenu = MAIN_MENU;
 	selectedItem = NULL;
+    categoryParentId=0;
 }
 
-void Gui::addElement(MenuItem elem)
+void Gui::addMenuItem(MenuItem item)
 {
-	if(elementCnt < MAX_ELEMENTS)
-		elements[elementCnt++]=elem;
+	if(menuItemCnt < MAX_MENU_ITEMS)
+		menuItems[menuItemCnt++]=item;
 }
 
 
-void Gui::clearElements()
+void Gui::clearMenu()
 {
-	elementCnt=0;
-	selectedElement=0;
+	menuItemCnt=0;
+	selectedMenuItem=0;
 }
 
 void Gui::update(int keycode) {
 	//65 U , 68 L , 67 R, 66 D, 127 BACK, 10 ENTER
 	
 	if(currMenu == ITEM_LIST && (keycode == 67 || keycode == 68)){
-		clearElements();
-		selectedElement = 0;
+		clearMenu();
+		selectedMenuItem = 0;
 		
-		if(keycode == 67 && items.size() > (page + 1) * MAX_ELEMENTS)
+		if(keycode == 67 && items.size() > (page + 1) * MAX_MENU_ITEMS)
 			page++;
 		if(keycode == 68 && page > 0)
 			page--;
@@ -40,43 +41,52 @@ void Gui::update(int keycode) {
 	}	
 
 	if(keycode == 65)
-		selectedElement = (selectedElement <= 0) ? elementCnt-1 : --selectedElement;
+		selectedMenuItem = (selectedMenuItem <= 0) ? menuItemCnt-1 : --selectedMenuItem;
 
 	else if(keycode == 66)
-		selectedElement = (selectedElement >= elementCnt-1) ? 0 : ++selectedElement;
+		selectedMenuItem = (selectedMenuItem >= menuItemCnt-1) ? 0 : ++selectedMenuItem;
 
 	else if(keycode == 127)
 	{
-		clearElements();
+		clearMenu();
 		if(currMenu == ITEM_PAGE){
 			
-			if(tmpSelectedElement != -1) {
-				selectedElement = tmpSelectedElement;
-				tmpSelectedElement = -1;
+			if(tmpSelectedMenuItem != -1) {
+				selectedMenuItem = tmpSelectedMenuItem;
+				tmpSelectedMenuItem = -1;
 			}
 			list(ITEM_LIST);
 		}
 		else{
-			selectedElement=0;
+			selectedMenuItem=0;
+			if(currMenu == CATEGORY_LIST)
+				selectedMenuItem=1;
 			if(currMenu == STOCK_LIST)
-				selectedElement=1;
+				selectedMenuItem=2;
 			currMenu = MAIN_MENU;
 			mainMenu();
 		}
 	}
 	else if(keycode == 10)
 	{
-        currMenu = elements[selectedElement].getFunction();
-		if(currMenu == ITEM_LIST) 
+        string newMenu = menuItems[selectedMenuItem].getFunction();
+		if(newMenu == ITEM_LIST) 
 		{
-			clearElements();
-			list();			
+			clearMenu();
+			list(newMenu);			
 		}
-		else if(currMenu == ITEM_PAGE)
+        else if(newMenu == CATEGORY_LIST) {
+            if(currMenu == newMenu)
+                categoryParentId = items[selectedMenuItem].getId();
+			clearMenu();
+			list(newMenu);		
+        }
+		else if(newMenu == ITEM_PAGE)
 		{
-			tmpSelectedElement = selectedElement;
-			clearElements();
-			itemPage(items.at(page*MAX_ELEMENTS+selectedElement));
+            currMenu = menuItems[selectedMenuItem].getFunction();
+			tmpSelectedMenuItem = selectedMenuItem;
+			clearMenu();
+			itemPage(items.at(page*MAX_MENU_ITEMS+selectedMenuItem));
 		}
 	}
 	print();
@@ -84,15 +94,15 @@ void Gui::update(int keycode) {
 
 void Gui::mainMenu(){
 	
-	title = "Moose Environment";
-   	addElement(MenuItem("Item list",ITEM_LIST));
-   	addElement(MenuItem("Stock list",STOCK_LIST));
+   	addMenuItem(MenuItem("Item List", ITEM_LIST));
+   	addMenuItem(MenuItem("Category list",CATEGORY_LIST));
+   	addMenuItem(MenuItem("Stock list",STOCK_LIST));
 }
 
 void Gui::itemPage(Item item){
 	
 	title = "Item nr." + to_string(item.getId()) + " - " + item.getName();
-	addElement(MenuItem(item.getDescription(),"asd"));
+	addMenuItem(MenuItem(item.getDescription(),"asd"));
 
 }
 
@@ -114,18 +124,35 @@ void Gui::list(){
 			items.push_back(Item((int)object["id"],object["name"],object["description"]));
 		}
 
-		for(int i=page*MAX_ELEMENTS; i<page*MAX_ELEMENTS+MAX_ELEMENTS; i++)
+		for(int i=page*MAX_MENU_ITEMS; i<page*MAX_MENU_ITEMS+MAX_MENU_ITEMS; i++)
 		{
 			if(i>=items.size()) break;
-	   		addElement(MenuItem(items.at(i).getName(),ITEM_PAGE));
+	   		addMenuItem(MenuItem(items.at(i).getName(),ITEM_PAGE));
+		}
+	}	
+
+	if(currMenu == CATEGORY_LIST){
+		title = "Categories - Page "+to_string(page);
+        
+		auto response = cpr::Get(cpr::Url{"http://localhost:8080/categories/parent_id="+to_string(categoryParentId)});
+		auto json = nlohmann::json::parse(response.text);	
+		items.clear();
+		for (auto& item : json) {
+			items.push_back(Item(categoryParentId,item["name"],item["description"],(int)item["id"]));
+		}
+
+		for(int i=page*MAX_MENU_ITEMS; i<page*MAX_MENU_ITEMS+MAX_MENU_ITEMS; i++)
+		{
+			if(i>=items.size()) break;
+	   		addMenuItem(MenuItem(items.at(i).getName(),CATEGORY_LIST));
 		}
 	}	
 	else if(currMenu == STOCK_LIST){
 		title = "Stocks - Page "+page;
-	   	addElement(MenuItem("Stock",NULL));
-	   	addElement(MenuItem("Stock",NULL));
-	   	addElement(MenuItem("Stock",NULL));
-	   	addElement(MenuItem("Stock",NULL));
+	   	addMenuItem(MenuItem("Stock",NULL));
+	   	addMenuItem(MenuItem("Stock",NULL));
+	   	addMenuItem(MenuItem("Stock",NULL));
+	   	addMenuItem(MenuItem("Stock",NULL));
 	}
 }
 
@@ -137,12 +164,12 @@ void Gui::print() {
     cout << "\t" + currMenu + " - " + title << endl;
     cout << "------------------------------------------------------------------" << endl;
     int i=0;
-    for(i=0; i<elementCnt; i++)
+    for(i=0; i<menuItemCnt; i++)
 	{
-		if(i==selectedElement)
-			cout << "\033[30;47m"+ elements[i].getText() +"\033[0m" << endl;
+		if(i==selectedMenuItem)
+			cout << "\033[30;47m"+ menuItems[i].getText() +"\033[0m" << endl;
 		else
-			cout << elements[i].getText() << endl;
+			cout << menuItems[i].getText() << endl;
 	}
 	for(i;i<10;i++)
 	{

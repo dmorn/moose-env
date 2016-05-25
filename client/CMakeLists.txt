@@ -31,6 +31,6 @@ endif()
 
 add_subdirectory(opt)
 
-add_executable(moose-client main.cpp gui.cpp item.cpp menuItem.cpp)
+add_executable(moose-client main.cpp gui.cpp item.cpp menuItem.cpp category.cpp)
 target_link_libraries(moose-client ${CPR_LIBRARIES})
 include_directories(${CPR_INCLUDE_DIRS} ${JSON_INCLUDE_DIRS})

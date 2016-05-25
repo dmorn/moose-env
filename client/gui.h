@@ -5,22 +5,24 @@
 #include <cpr/cpr.h>
 #include <json.hpp>
 #include "item.h"
+#include "category.h"
 #include "menuItem.h"
 
 using namespace std;
 class Gui{
 	
-	#define MAX_ELEMENTS 10
+	#define MAX_MENU_ITEMS 10
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
+	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
 	#define ITEM_PAGE "SIP"
 
 	public:
 		Gui();
 		void print();
-		void addElement(MenuItem elem);
-		void clearElements();
+		void addMenuItem(MenuItem item);
+		void clearMenu();
 		void update(int keycode);
 		void mainMenu();
 		
@@ -29,11 +31,12 @@ class Gui{
 		void list(string list_type);
 		void itemPage(Item item);
 		string title;
-		MenuItem elements[MAX_ELEMENTS];
-		int elementCnt;
-		int selectedElement, tmpSelectedElement;
+		MenuItem menuItems[MAX_MENU_ITEMS];
+		int menuItemCnt;
+		int selectedMenuItem, tmpSelectedMenuItem;
 		int page;
 		string currMenu;
+		int categoryParentId;
 		std::vector<Item> items;
 		Item * selectedItem;
 };
