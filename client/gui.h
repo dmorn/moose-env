@@ -1,13 +1,16 @@
 #ifndef gui_h
 #define gui_h
-#include<iostream>
+#include <iostream>
+#include <vector>
 #include <cpr/cpr.h>
 #include <json.hpp>
+#include "item.h"
+#include "menuItem.h"
 
 using namespace std;
 class Gui{
 	
-	#define MAX_ELEMENTS 12
+	#define MAX_ELEMENTS 10
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define STOCK_LIST "SSL"
@@ -16,19 +19,23 @@ class Gui{
 	public:
 		Gui();
 		void print();
-		void addElement(string elem, string function, string param_1);
+		void addElement(MenuItem elem);
 		void clearElements();
 		void update(int keycode);
 		void mainMenu();
 		
 	private:
-		void list(string type, int page);
-		void itemPage(string id);
+		void list();
+		void list(string list_type);
+		void itemPage(Item item);
 		string title;
-		string elements[MAX_ELEMENTS][10];
+		MenuItem elements[MAX_ELEMENTS];
 		int elementCnt;
-		int selectedElement;
-
+		int selectedElement, tmpSelectedElement;
+		int page;
+		string currMenu;
+		std::vector<Item> items;
+		Item * selectedItem;
 };
 
 #endif

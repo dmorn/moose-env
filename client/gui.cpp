@@ -4,54 +4,80 @@ Gui::Gui(){
 	
 	elementCnt=0;
 	selectedElement=0;
+	tmpSelectedElement=-1;
+	page=0;
 	title="Test";
+	currMenu = MAIN_MENU;
+	selectedItem = NULL;
 }
 
-void Gui::addElement(string elem, string function, string param_1)
+void Gui::addElement(MenuItem elem)
 {
-	if(elementCnt < MAX_ELEMENTS){
-		elements[elementCnt][0]=elem;
-		elements[elementCnt][1]=function;
-		elements[elementCnt][2]=param_1;
-		elementCnt++;
-	}
+	if(elementCnt < MAX_ELEMENTS)
+		elements[elementCnt++]=elem;
 }
 
 
 void Gui::clearElements()
 {
 	elementCnt=0;
+	selectedElement=0;
 }
 
 void Gui::update(int keycode) {
 	//65 U , 68 L , 67 R, 66 D, 127 BACK, 10 ENTER
-	if(keycode == 65){
-		selectedElement--;
-			if(selectedElement < 0)
-				selectedElement = elementCnt-1;
+	
+	if(currMenu == ITEM_LIST && (keycode == 67 || keycode == 68)){
+		clearElements();
+		selectedElement = 0;
+		
+		if(keycode == 67 && items.size() > (page + 1) * MAX_ELEMENTS)
+			page++;
+		if(keycode == 68 && page > 0)
+			page--;
+		
+		list();
 	}	
-	else if(keycode == 66){
-		selectedElement++;
-			if(selectedElement >= elementCnt)
-				selectedElement = 0;
-	}
+
+	if(keycode == 65)
+		selectedElement = (selectedElement <= 0) ? elementCnt-1 : --selectedElement;
+
+	else if(keycode == 66)
+		selectedElement = (selectedElement >= elementCnt-1) ? 0 : ++selectedElement;
+
 	else if(keycode == 127)
 	{
 		clearElements();
-		mainMenu();
-		selectedElement=0;
+		if(currMenu == ITEM_PAGE){
+			
+			if(tmpSelectedElement != -1) {
+				selectedElement = tmpSelectedElement;
+				tmpSelectedElement = -1;
+			}
+			list(ITEM_LIST);
+		}
+		else{
+			selectedElement=0;
+			if(currMenu == STOCK_LIST)
+				selectedElement=1;
+			currMenu = MAIN_MENU;
+			mainMenu();
+		}
 	}
 	else if(keycode == 10)
 	{
-		clearElements();
-		string func = elements[selectedElement][1];
-		if(func == MAIN_MENU) 
-			mainMenu();
-		else if(func == ITEM_PAGE)
-			itemPage(elements[selectedElement][2]);
-		else 
-			list(func,stoi(elements[selectedElement][2]));
-		selectedElement=0;
+        currMenu = elements[selectedElement].getFunction();
+		if(currMenu == ITEM_LIST) 
+		{
+			clearElements();
+			list();			
+		}
+		else if(currMenu == ITEM_PAGE)
+		{
+			tmpSelectedElement = selectedElement;
+			clearElements();
+			itemPage(items.at(page*MAX_ELEMENTS+selectedElement));
+		}
 	}
 	print();
 }
@@ -59,76 +85,69 @@ void Gui::update(int keycode) {
 void Gui::mainMenu(){
 	
 	title = "Moose Environment";
-   	addElement("Item list",ITEM_LIST,"0");
-   	addElement("Stock list",STOCK_LIST,"0");
+   	addElement(MenuItem("Item list",ITEM_LIST));
+   	addElement(MenuItem("Stock list",STOCK_LIST));
 }
 
-void Gui::itemPage(string id){
+void Gui::itemPage(Item item){
 	
-	title = "Item nr."+id;
-	auto response = cpr::Get(cpr::Url{"http://localhost:8080/objects/id="+id});
-	auto item = nlohmann::json::parse(response.text);
-	addElement(item["name"],"nil","1");
-	addElement(item["description"],"nil","1");
-	addElement(item["description"],"nil","1");
+	title = "Item nr." + to_string(item.getId()) + " - " + item.getName();
+	addElement(MenuItem(item.getDescription(),"asd"));
+
 }
 
-void Gui::list(string type, int page){
-	
-	if(type == ITEM_LIST){
+void Gui::list(string list_type){
+	currMenu = list_type;
+    list();
+}
+
+void Gui::list(){
+
+	if(currMenu == ITEM_LIST){
 		title = "Items - Page "+to_string(page);
-	 	auto response = cpr::Get(cpr::Url{"http://localhost:8080/items"});
-		auto items = nlohmann::json::parse(response.text);
-		
-		int cnt=0;
-		for (auto& item : items) {
-			if(cnt>=(page*(MAX_ELEMENTS-2))){
-				nlohmann::json object = item["object"];
-				cout << object["name"];
-	   			//addElement(object["name"],ITEM_PAGE,to_string((int)item["id"]));
 
-			}
-			if((cnt+1)>=((page+1)*(MAX_ELEMENTS-2))) {
-	   			addElement("...To page " + to_string(page+1) + "-->",ITEM_LIST,to_string(page+1));
-				break;
-			}
-			cnt++;
-			
+		auto response = cpr::Get(cpr::Url{"http://localhost:8080/items"});
+		auto json = nlohmann::json::parse(response.text);	
+		items.clear();
+		for (auto& item : json) {
+			nlohmann::json object = item["object"];
+			items.push_back(Item((int)object["id"],object["name"],object["description"]));
 		}
-		if(page > 0){
-			string text = "<--To page ";
-			text += to_string(page-1);
-			text += "...";
-   			addElement(text,ITEM_LIST,to_string(page-1));
+
+		for(int i=page*MAX_ELEMENTS; i<page*MAX_ELEMENTS+MAX_ELEMENTS; i++)
+		{
+			if(i>=items.size()) break;
+	   		addElement(MenuItem(items.at(i).getName(),ITEM_PAGE));
 		}
 	}	
-	else if(type == STOCK_LIST){
+	else if(currMenu == STOCK_LIST){
 		title = "Stocks - Page "+page;
-	   	addElement("Stock",STOCK_LIST,"0");
-	   	addElement("Stock",STOCK_LIST,"0");
-	   	addElement("Stock",STOCK_LIST,"0");
-	   	addElement("Stock",STOCK_LIST,"0");
+	   	addElement(MenuItem("Stock",NULL));
+	   	addElement(MenuItem("Stock",NULL));
+	   	addElement(MenuItem("Stock",NULL));
+	   	addElement(MenuItem("Stock",NULL));
 	}
 }
 
 void Gui::print() {
 	
-    //std::system("clear");	   
+    std::system("clear");	   
 
     cout << "------------------------------------------------------------------" << endl;
-    cout << "\t" + title << endl;
+    cout << "\t" + currMenu + " - " + title << endl;
     cout << "------------------------------------------------------------------" << endl;
     int i=0;
     for(i=0; i<elementCnt; i++)
 	{
 		if(i==selectedElement)
-		{
-			cout << "|X| " + elements[i][0] << endl;
-		}
+			cout << "\033[30;47m"+ elements[i].getText() +"\033[0m" << endl;
 		else
-		{
-			cout << "| | " + elements[i][0] << endl;
-		}
+			cout << elements[i].getText() << endl;
 	}
+	for(i;i<10;i++)
+	{
+		cout << endl;
+	}	
+	cout << "-- Use arrow keys to move cursor/change page --" << endl;
 	
 }
