@@ -11,17 +11,19 @@
 using namespace std;
 class Gui{
 	
-	#define MAX_MENU_ITEMS 10
+	#define MENU_ITEMS 10
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
 	#define ITEM_PAGE "SIP"
+	#define ADD_ITEM_PAGE "AIP"
+	#define OBJ_BY_CAT_LIST "OBC"
 
 	public:
 		Gui();
 		void print();
-		void addMenuItem(MenuItem item);
+		void addMenuItem(Item item);
 		void clearMenu();
 		void update(int keycode);
 		void mainMenu();
@@ -29,16 +31,18 @@ class Gui{
 	private:
 		void list();
 		void list(string list_type);
+		void addItemPage();
+		void addItemPage(Item item);
 		void itemPage(Item item);
+		void updateScrollPos();
 		string title;
-		MenuItem menuItems[MAX_MENU_ITEMS];
-		int menuItemCnt;
 		int selectedMenuItem, tmpSelectedMenuItem;
-		int page;
+		int scrollPos;
 		string currMenu;
-		int categoryParentId;
+		int currCategoryId;
 		std::vector<Item> items;
 		Item * selectedItem;
+		bool addItem;
 };
 
 #endif
