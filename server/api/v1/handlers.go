@@ -110,23 +110,59 @@ func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ItemHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
 
+	vars := mux.Vars(r)
 	var itemID int
+	var categoryID int
+
+	var err1 error
+	var err2 error
+
+	itemID, err1 = strconv.Atoi(vars["item_id"])
+	categoryID, err2 = strconv.Atoi(vars["category_id"])
+
+	if err1 != nil && err2 != nil {
+		http.Error(w, err1.Error(), 500)
+		return
+	}
+
 	var item *Item
+	var items *Items
 	var err error
 
-	itemID, err = strconv.Atoi(vars["item_id"])
+	if itemID > 0 {
+		item, err = GetItem(itemID)
+	} else if categoryID > 0 {
+		items, err = GetItemByCategory(categoryID)
+	}
 
 	if err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		if item != nil {
+			json.NewEncoder(w).Encode(item)
+		}
+		if items != nil {
+			json.NewEncoder(w).Encode(items)
+		}
+	}
+}
+
+func ItemsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var catID int
+	var err error
+
+	if catID, err = strconv.Atoi(vars["category_id"]); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	if item, err = GetItem(itemID); err != nil {
+	if items, err := GetItemsWithCategoriesAndSubcategories(catID); err != nil {
 		http.Error(w, err.Error(), 404)
 	} else {
-		json.NewEncoder(w).Encode(item)
+		json.NewEncoder(w).Encode(items)
 	}
 }
 

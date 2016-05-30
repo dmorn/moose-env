@@ -225,6 +225,10 @@ func GetCategoriesWithSubcategories(id int) (*Categories, error) {
 	categories := Categories{}
 
 	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	for rows.Next() {
 		category := Category{}
@@ -249,6 +253,10 @@ func GetCategoriesWithParent(id int) (*Categories, error) {
 	categories := Categories{}
 
 	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	for rows.Next() {
 		category := Category{}
@@ -276,6 +284,58 @@ func GetItem(id int) (*Item, error) {
 
 	item.Object, err = GetObject(item.ObjectId)
 	return &item, err
+}
+
+func GetItemByCategory(categoryID int) (*Items, error) {
+
+	query := fmt.Sprintf("select item_id from group_items where category_id = %d", categoryID)
+	items := Items{}
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		//take every id
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		item, _ := GetItem(id)
+		items = append(items, *item)
+	}
+	return &items, err
+}
+
+//GetItemsWithCategoriesAndSubcategories gets every item with the requested category_id and every item each subcategory recursevly
+func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
+
+	//means that the category is a super category.
+	if id == 0 {
+		return GetItems()
+	}
+
+	query := fmt.Sprintf("select item_id from group_items where isSubCategoryOf(category_id, %d) = 1", id)
+	items := Items{}
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		//take every id
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		item, _ := GetItem(id)
+		items = append(items, *item)
+	}
+	return &items, err
 }
 
 //POST
