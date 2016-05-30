@@ -74,6 +74,12 @@ void Gui::update(int keycode) {
             currCategoryId = p_id["Int64"];		
 			list();
 		}
+		else if(currMenu == OBJ_BY_CAT_LIST)
+		{
+			currMenu  = CATEGORY_LIST;
+			clearMenu();
+			list();
+		}
 		else{
 			selectedMenuItem=0;
 			if(currMenu == CATEGORY_LIST)
@@ -93,14 +99,20 @@ void Gui::update(int keycode) {
 
         else if(currMenu == CATEGORY_LIST) {
 			if(items.at(selectedMenuItem).getId() == 0) {
-            	currCategoryId = items.at(selectedMenuItem).getId();
-				list();		
+
+	        	currCategoryId = items.at(selectedMenuItem).getId();
+				list();	
 			}
 			else if(addItem) {
-
-            	currCategoryId = items.at(selectedMenuItem).getId();
-				currMenu = OBJ_BY_CAT_LIST;
-				list();		
+				if(hasResult("objects/cat="+to_string(items.at(selectedMenuItem).getId())))
+				{
+		        	currCategoryId = items.at(selectedMenuItem).getId();
+					currMenu = OBJ_BY_CAT_LIST;
+					list();		
+				}
+				else{
+					popupMessage("No such items.");
+				}	
 			}
 		}
 
@@ -122,8 +134,14 @@ void Gui::update(int keycode) {
 	else if(keycode == 9)
 	{
 		currMenu=CATEGORY_LIST;
-        currCategoryId = items.at(selectedMenuItem).getId();
-		list();	
+		if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
+		{
+		    currCategoryId = items.at(selectedMenuItem).getId();
+			list();
+		}
+		else{
+			popupMessage("No further subcategories.");
+		}	
 
 	}
 	print();
@@ -132,6 +150,7 @@ void Gui::update(int keycode) {
 void Gui::mainMenu(){
 	
     clearMenu();
+	title = "Moose env.";
    	addMenuItem(Item("Item List", ITEM_LIST));
    	addMenuItem(Item("Add item",ADD_ITEM_PAGE));
    	addMenuItem(Item("Stock list",STOCK_LIST));
@@ -149,20 +168,79 @@ void Gui::addItemPage(Item item) {
 	
 	title = "Add Item";
 	addItem=true;
-    clearMenu();
+    	clearMenu();
 	addMenuItem(Item(item.getName(),CATEGORY_LIST));
 
-    std::system("clear");	   
-    cout << "------------------------------------------------------------------" << endl;
-    cout << "\tAdd Item - " + item.getName() << endl;
-    cout << "------------------------------------------------------------------" << endl;
-	cout << "Enter quantity: ";
-	int quantity;
-	cin >> quantity;
-	cout << "Enter price in coins: ";
-	int coins;
-	cin >> coins;
+    std::system("clear");	
+	string res="";
+	while(!isNumber(res))
+		res = popupInput("Quantity:");
+    int quantity = stoi(res);
+	res="";
+	while(!isNumber(res))
+		res = popupInput("Coins:");
+    int coins = stoi(res);
+	string input;
+	while(input != "y" && input != "n")
+		input = popupInput("Add: "+to_string(quantity) +"x " +item.getName() + " for " + to_string(coins) + " coins? (y/n)");
 
+	addItem=false;
+	if(input == "y")
+		itemPage(item);
+
+	else mainMenu();
+}
+
+bool Gui::isNumber(string s) {
+	
+	if(s.size() == 0) return false;
+	for(int i=0; i < s.size(); i++)
+		if((int)s[i] < 48 || (int)s[i] > 57)
+			return false;
+	return true;
+}
+
+string Gui::centerText(string text, int width) {
+
+	string out;
+	int l_space = width/2 - text.size()/2;
+	int r_space = width - text.size() - l_space;
+	
+	for(int i=0; i< l_space; i++)
+		out += " ";
+	out+= text;
+	for(int i=0; i< r_space; i++)
+		out += " ";
+	return out;
+}
+
+
+void Gui::popupMessage(string text) {
+
+    std::system("clear");	   
+	
+    cout << "\n\n\t+------------------------------------------------+" << endl;
+	cout << "\t|"+centerText(text,48) +"|" << endl;
+    cout << "\t+------------------------------------------------+" << endl;
+	cout << "\t|"+centerText("Press Enter to continue.",48) +"|" << endl;
+    cout << "\t+------------------------------------------------+" << endl;
+	getchar();
+    std::system("clear");	   
+	list();
+}
+
+string Gui::popupInput(string text) {
+
+    std::system("clear");	   
+	cout << "\n\n\t+------------------------------------------------+" << endl;
+	cout << "\t|"+centerText(text,48) +"|" << endl;
+    cout << "\t+------------------------------------------------+" << endl;
+	cout << "\tInput: ";
+	string input;
+	cin >> input;
+    std::system("clear");	   
+	list();
+	return input;
 }
 
 void Gui::itemPage(Item item){
@@ -189,7 +267,7 @@ void Gui::list(){
         clearMenu();
 		for (auto& item : json) {
 		    nlohmann::json object = item["object"];
-		    items.push_back(Item(object["name"],(int)object["id"],object["description"]));
+		    items.push_back(Item(object["name"],(int)item["id"],object["description"]));
 		}
 	}	
 
@@ -200,14 +278,9 @@ void Gui::list(){
 		auto response = cpr::Get(cpr::Url{"http://localhost:8080/categories/parent_id="+to_string(currCategoryId)});
 		auto json = nlohmann::json::parse(response.text);	
 
-		if(json.size() < 1) {
-            currCategoryId = items.at(selectedMenuItem).getParentId();
-		}
-		else {
-		    clearMenu();
-			for (auto& item : json) {
-				items.push_back(Item(item["name"],(int)item["id"],item["description"],currCategoryId));
-			}
+	    clearMenu();
+		for (auto& item : json) {
+			items.push_back(Item(item["name"],(int)item["id"],item["description"],currCategoryId));
 		}
 	}	
 
@@ -233,15 +306,21 @@ void Gui::list(){
 	}
 }
 
+bool Gui::hasResult(string query) {	
+	auto response = cpr::Get(cpr::Url{"http://localhost:8080/"+query});
+	auto json = nlohmann::json::parse(response.text);	
+	return json.size() > 0;
+}
+
 void Gui::print() {
 	
     updateScrollPos();
 
     std::system("clear");	   
-
-    cout << "------------------------------------------------------------------" << endl;
-    cout << "\t" + currMenu + " - " + title << endl;
-    cout << "------------------------------------------------------------------" << endl;
+	
+    cout << "+----------------------------------------------------------------+" << endl;
+	cout << "|"+centerText(currMenu + " - " + title,64) + "|" << endl;
+    cout << "+----------------------------------------------------------------+" << endl;
 
     for(int i=scrollPos; i<MENU_ITEMS + scrollPos; i++)
 	{

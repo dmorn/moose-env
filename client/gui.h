@@ -35,6 +35,12 @@ class Gui{
 		void addItemPage(Item item);
 		void itemPage(Item item);
 		void updateScrollPos();
+		bool hasResult(string query);
+		string popupInput(string text);
+		void popupMessage(string text);
+		string centerText(string text, int width);
+		bool isNumber(string s);
+
 		string title;
 		int selectedMenuItem, tmpSelectedMenuItem;
 		int scrollPos;
