@@ -278,6 +278,29 @@ func GetItem(id int) (*Item, error) {
 	return &item, err
 }
 
+func GetItemByCategory(categoryID int) (*Items, error) {
+
+	query := fmt.Sprintf("select item_id from group_items where category_id = %d", categoryID)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := Items{}
+	for rows.Next() {
+		//take every id
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		item, _ := GetItem(id)
+		items = append(items, *item)
+	}
+	return &items, err
+}
+
 //POST
 
 //for testing

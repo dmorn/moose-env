@@ -86,6 +86,13 @@ var routes = Routes{
 		false,
 	},
 	Route{
+		"Item",
+		"GET",
+		"/items/cat={category_id}",
+		ItemHandler,
+		false,
+	},
+	Route{
 		"Category",
 		"GET",
 		"/categories/id={category_id}",
