@@ -148,6 +148,24 @@ func ItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ItemsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var catID int
+	var err error
+
+	if catID, err = strconv.Atoi(vars["category_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if items, err := GetItemsWithCategoriesAndSubcategories(catID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+}
+
 func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
