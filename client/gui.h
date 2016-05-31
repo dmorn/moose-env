@@ -1,33 +1,48 @@
 #ifndef gui_h
 #define gui_h
-#include<iostream>
+#include <iostream>
+#include <vector>
 #include <cpr/cpr.h>
 #include <json.hpp>
+#include "item.h"
+#include "category.h"
+#include "menuItem.h"
 
 using namespace std;
 class Gui{
 	
-	#define MAX_ELEMENTS 4
+	#define MENU_ITEMS 10
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
+	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
-	#define SHOW_ITEM "SIT"
+	#define ITEM_PAGE "SIP"
+	#define ADD_ITEM_PAGE "AIP"
+	#define OBJ_BY_CAT_LIST "OBC"
 
 	public:
 		Gui();
 		void print();
-		void addElement(string elem, string function, string param_1);
-		void clearElements();
+		void addMenuItem(Item item);
+		void clearMenu();
 		void update(int keycode);
 		void mainMenu();
 		
 	private:
-		void list(string type, int page);
+		void list();
+		void list(string list_type);
+		void addItemPage();
+		void addItemPage(Item item);
+		void itemPage(Item item);
+		void updateScrollPos();
 		string title;
-		string elements[MAX_ELEMENTS][10];
-		int elementCnt;
-		int selectedElement;
-
+		int selectedMenuItem, tmpSelectedMenuItem;
+		int scrollPos;
+		string currMenu;
+		int currCategoryId;
+		std::vector<Item> items;
+		Item * selectedItem;
+		bool addItem;
 };
 
 #endif
