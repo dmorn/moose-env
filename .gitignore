@@ -40,7 +40,7 @@
 # Folders
 _obj
 _test
-_example
+#_example
 
 # Architecture specific extensions/prefixes
 *.[568vq]
