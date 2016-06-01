@@ -1,7 +1,10 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -76,7 +79,7 @@ func GetUsers() (*Users, error) {
 		user := User{}
 
 		if err := rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId); err != nil {
+			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -103,6 +106,26 @@ func GetCategories() (*Categories, error) {
 		cats = append(cats, cat)
 	}
 	return &cats, nil
+}
+
+func GetCategoriesIDs() ([]sql.NullInt64, error) {
+
+	const query = `select category_id from category;`
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cats := make([]sql.NullInt64, 0)
+	for rows.Next() {
+		var id sql.NullInt64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		cats = append(cats, id)
+	}
+	return cats, nil
 }
 
 func GetGroups() (*Groups, error) {
@@ -164,12 +187,57 @@ func GetItems() (*Items, error) {
 			return nil, err
 		}
 		item.Object, _ = GetObject(item.ObjectId)
+		item.Stock, _ = GetStock(item.StockId)
 		items = append(items, item)
 	}
 	return &items, nil
 }
 
 //specific getters
+
+func GetUser(id int) (*User, error) {
+
+	query := fmt.Sprintf("select * from user where user_id = %d", id)
+
+	user := User{}
+	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
+
+	return &user, err
+}
+
+func GetUserByUsername(u string) (*User, error) {
+
+	query := fmt.Sprintf("select * from `user` where username LIKE '%s'", u)
+
+	user := User{}
+	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
+
+	return &user, err
+}
+
+func CheckUserIsStockTaker(user *User) ([]int, error) {
+
+	query := fmt.Sprintf("select user_id from user_stock where user_id = %d", user.Id)
+
+	if rows, err := db.Query(query); err != nil {
+		return nil, err
+	} else {
+		list := make([]int, 0)
+		for rows.Next() {
+			var el int
+			rows.Scan(&el)
+			list = append(list, el)
+		}
+
+		if len(list) > 0 {
+			return list, err
+		}
+		return nil, errors.New("You're not in the Fight Club boy")
+	}
+}
+
 func GetObject(id int) (*Object, error) {
 
 	query := fmt.Sprintf("select object_id, name, description, category_id from object where object_id = %d", id)
@@ -313,7 +381,56 @@ func GetItem(id int) (*Item, error) {
 	}
 
 	item.Object, err = GetObject(item.ObjectId)
+	item.Stock, err = GetStock(item.StockId)
 	return &item, err
+}
+
+func PurchaseItem(id int, user *User) (*Item, error) {
+
+	if item, err := GetItem(id); err != nil {
+		return nil, err
+	} else {
+
+		//check that the user has enough money first
+		if user.Balance-item.Coins < 0 {
+			return nil, errors.New(fmt.Sprintf("Not Enough money bro, your balance is %d", user.Balance))
+
+		}
+
+		//we have the item, now delete it
+		if err := DeleteItem(id); err != nil {
+			return nil, err
+		}
+
+		//withdraw money from user
+		if err := WithdrawAmountToUserBalance(user, item.Coins); err != nil {
+			//re insert the item
+			PostItem(item, item.Status)
+			return nil, err
+		}
+
+		//everything is fine
+		return item, nil
+	}
+}
+
+func DeleteItem(id int) error {
+
+	query := fmt.
+		Sprintf("DELETE FROM item WHERE item_id=%d LIMIT 1", id)
+	_, err := db.Query(query)
+	return err
+}
+
+func GetStock(id int) (*Stock, error) {
+
+	query := fmt.Sprintf("select * from stock where stock_id = %d", id)
+
+	stock := Stock{}
+	err := db.QueryRow(query).
+		Scan(&stock.Id, &stock.Name, &stock.Location)
+
+	return &stock, err
 }
 
 func GetItemByCategory(categoryID int) (*Items, error) {
@@ -369,6 +486,32 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 }
 
 //POST
+
+func AddUserToStockTakers(user *User, id int) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES (%d, %d)",
+		user.Id, id)
+
+	_, err := db.Query(query)
+	return err
+}
+
+func PostUser(user *User) error {
+
+	hasher := sha256.New()
+	hasher.Write([]byte(user.Password))
+	hash := hex.EncodeToString(hasher.Sum(nil))
+
+	query := fmt.
+		Sprintf("INSERT INTO `user` (`username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES ('%s', '%s', '%s', '%s', '%s', 0, 1, %d)",
+		user.Username, hash, user.Email, user.Name, user.Surname, user.GroupId)
+
+	fmt.Println(query)
+	_, err := db.Query(query)
+	return err
+}
+
 func PostObject(object *Object) error {
 
 	query := fmt.
@@ -380,12 +523,68 @@ func PostObject(object *Object) error {
 	return err
 }
 
-func PostItem(item *Item) error {
+func PostItem(item *Item, status int) error {
 
 	query := fmt.
 		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,%d,%d);",
 		item.Id, item.Coins, item.Status, item.Quantity, item.ObjectId, item.StockId)
 
+	_, err := db.Query(query)
+	return err
+}
+
+func PostCategory(category *Category) error {
+
+	var query string
+
+	if category.ParentId.Valid {
+		query = fmt.
+			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES ('%d', '%s', '%s');",
+			category.ParentId.Int64, category.Name, category.Description)
+	} else {
+		query = fmt.
+			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES (NULL, '%s', '%s');",
+			category.Name, category.Description)
+	}
+
+	fmt.Println(query)
+	_, err := db.Query(query)
+	return err
+}
+
+//PATCH
+func AddAmountToUserBalance(user *User, amount int) error {
+
+	balance := amount + user.Balance
+	query := fmt.
+		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d", balance, user.Id)
+
+	_, err := db.Query(query)
+	return err
+}
+
+func WithdrawAmountToUserBalance(user *User, amount int) error {
+
+	balance := user.Balance - amount
+	query := fmt.
+		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d", balance, user.Id)
+
+	_, err := db.Query(query)
+	return err
+}
+
+func UpdateItemsStatusToPending(stock_id int) error {
+
+	query := fmt.
+		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d", stock_id)
+	_, err := db.Query(query)
+	return err
+}
+
+func PutItemsIntoStock(stock_id int) error {
+
+	query := fmt.
+		Sprintf("UPDATE `item` SET status=1 WHERE status=2 AND stock_id=%d", stock_id)
 	_, err := db.Query(query)
 	return err
 }

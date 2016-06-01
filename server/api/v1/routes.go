@@ -3,64 +3,54 @@ package main
 import "net/http"
 
 type Route struct {
-	Name         string
-	Method       string
-	Pattern      string
-	HandlerFunc  http.HandlerFunc
-	AuthRequired bool
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
 
 type Routes []Route
 
 var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-		false,
-	},
+
 	Route{
 		"Objects",
 		"GET",
 		"/objects",
 		ObjectsHandler,
-		false,
 	},
-	Route{
-		"Users",
-		"GET",
-		"/users",
-		UsersHandler,
-		false,
-	},
+	//Route{
+	//	"Users",
+	//	"GET",
+	//	"/users",
+	//	UsersHandler,
+	//},
 	Route{
 		"Categories",
 		"GET",
 		"/categories",
 		CategoriesHandler,
-		false,
 	},
+
 	Route{
 		"Groups",
 		"GET",
 		"/groups",
 		GroupsHandler,
-		false,
 	},
+
 	Route{
 		"Stocks",
 		"GET",
 		"/stocks",
 		StocksHandler,
-		false,
 	},
+
 	Route{
 		"Items",
 		"GET",
 		"/items",
 		ItemsHandler,
-		false,
 	},
 
 	//specific routes
@@ -69,78 +59,143 @@ var routes = Routes{
 		"GET",
 		"/objects/id={object_id}",
 		ObjectHandler,
-		false,
 	},
+	Route{
+		"User",
+		"GET",
+		"/user",
+		UserHandler,
+	},
+
 	Route{
 		"Object",
 		"GET",
 		"/objects/cat={category_id}",
 		ObjectHandler,
-		false,
 	},
 	Route{
 		"Object",
 		"GET",
 		"/objects/start_cat_id={category_id}",
 		ObjectsWithCategoriesAndSubcategoriesHandler,
-		false,
 	},
+
 	Route{
 		"Item",
 		"GET",
 		"/items/id={item_id}",
 		ItemHandler,
-		false,
 	},
 	Route{
 		"Item",
 		"GET",
 		"/items/cat={category_id}",
 		ItemHandler,
-		false,
 	},
 	Route{
 		"Item",
 		"GET",
 		"/items/start_cat_id={category_id}",
 		ItemsWithCategoriesAndSubcategoriesHandler,
-		false,
 	},
+	Route{
+		"Item",
+		"POST",
+		"/purchase/{item_id}",
+		PurchaseItemHandler,
+	},
+
+	Route{
+		"Stocks",
+		"GET",
+		"/stock/id={stock_id}",
+		StockHandler,
+	},
+
 	Route{
 		"Category",
 		"GET",
 		"/categories/id={category_id}",
 		CategoryHandler,
-		false,
 	},
 	Route{
 		"Categories",
 		"GET",
 		"/categories/start_id={category_id}",
 		CategoriesWithSubcategoriesHandeler,
-		false,
 	},
 	Route{
 		"Categories",
 		"GET",
 		"/categories/parent_id={parent_id}",
 		CategoriesWithParentHandler,
-		false,
 	},
 
 	//posts
+	//login related stuff
+	Route{
+		"Login",
+		"POST",
+		"/login",
+		LoginHandler,
+	},
+	Route{
+		"Register",
+		"POST",
+		"/register",
+		RegistrationHandler,
+	},
+
+	//others
+	Route{
+		"User",
+		"POST",
+		"/add_stock_taker/{username}/{stock_id}",
+		AddStockTakerHandler,
+	},
+	Route{
+		"User",
+		"POST",
+		"/balance/{username}/withdraw={amount}",
+		UserWithdrawBalance,
+	},
+	Route{
+		"User",
+		"POST",
+		"/balance/{username}/add={amount}",
+		UserAddBalance,
+	},
+
 	Route{
 		"Object",
 		"POST",
 		"/object",
 		PostObjectHandler,
-		false,
 	},
+
 	Route{
 		"Item",
 		"POST",
 		"/item",
 		PostItemHandler,
-		false,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/purchase_wishlist/{stock_id}",
+		PurchaseWishlistHandler,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/into_stock/{stock_id}",
+		PutPurchasesIntoStockHandler,
+	},
+
+	Route{
+		"Category",
+		"POST",
+		"/category",
+		PostCategoryHandler,
 	},
 }
