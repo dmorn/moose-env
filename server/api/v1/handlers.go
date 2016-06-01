@@ -109,6 +109,24 @@ func ObjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ObjectsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var catID int
+	var err error
+
+	if catID, err = strconv.Atoi(vars["category_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if objects, err := GetObjectsWithCategoriesAndSubcategories(catID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(objects)
+	}
+}
+
 func ItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -224,7 +242,6 @@ func CategoriesWithParentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //post handlers
-
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -244,6 +261,8 @@ func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//for testing
+//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)

@@ -208,6 +208,36 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 	return &objects, err
 }
 
+//GetItemsWithCategoriesAndSubcategories gets every item with the requested category_id and every item each subcategory recursevly
+func GetObjectsWithCategoriesAndSubcategories(id int) (*Objects, error) {
+
+	//means that the category is a super category.
+	if id == 0 {
+		return GetObjects()
+	}
+
+	query := fmt.Sprintf("select * from object where isSubCategoryOf(category_id, %d) = 1", id)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	objects := Objects{}
+
+	for rows.Next() {
+		obj := Object{}
+
+		if err := rows.Scan(&obj.Id, &obj.Name, &obj.Description, &obj.CategoryId); err != nil {
+			return nil, err
+		}
+		obj.Category, _ = GetCategory(obj.CategoryId)
+		objects = append(objects, obj)
+	}
+	return &objects, nil
+}
+
 func GetCategory(id int) (*Category, error) {
 
 	query := fmt.Sprintf("select category_id, parent_id, name, description from category where category_id = %d", id)
@@ -339,9 +369,6 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 }
 
 //POST
-
-//for testing
-//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObject(object *Object) error {
 
 	query := fmt.
