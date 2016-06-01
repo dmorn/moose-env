@@ -23,15 +23,6 @@ func ObjectsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UsersHandler(w http.ResponseWriter, r *http.Request) {
-
-	if users, err := GetUsers(); err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		json.NewEncoder(w).Encode(users)
-	}
-}
-
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	if cats, err := GetCategories(); err != nil {

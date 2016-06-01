@@ -170,6 +170,29 @@ func GetItems() (*Items, error) {
 }
 
 //specific getters
+
+func GetUser(id int) (*User, error) {
+
+	query := fmt.Sprintf("select * from user where user_id = %d", id)
+
+	user := User{}
+	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId)
+
+	return &user, err
+}
+
+func GetUserByUsername(u string) (*User, error) {
+
+	query := fmt.Sprintf("select * from `user` where username LIKE '%s'", u)
+
+	user := User{}
+	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId)
+
+	return &user, err
+}
+
 func GetObject(id int) (*Object, error) {
 
 	query := fmt.Sprintf("select object_id, name, description, category_id from object where object_id = %d", id)

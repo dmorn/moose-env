@@ -20,14 +20,23 @@ type User struct {
 	Type       int            `json:"type"`
 	VerifyCode sql.NullString `json:"verify_code"`
 	GroupId    sql.NullString `json:"group_id"`
-	Salt       string         `json:"salt"`
+	Salt       []byte         `json:"salt"`
 }
 
 type Users []User
 
+type BaseUser struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type token struct {
+	Token string `json:"token"`
+}
+
 type StockTaker struct {
-	User
-	Stock
+	User  `json:"user"`
+	Stock `json:"stock"`
 }
 
 type Stock struct {
@@ -78,24 +87,3 @@ type Item struct {
 }
 
 type Items []Item
-
-/*
-
-
-type Category struct {
-	BaseInfo
-	Parent_id int `json:"parent_id"`
-}
-
-type Group struct {
-	BaseInfo
-	Items []Item `json:"items"`
-}
-
-
-
-type Request struct {
-	Group_id int `json:"group_id"`
-	User_id  int `json:"user_id"`
-}
-*/
