@@ -339,9 +339,6 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 }
 
 //POST
-
-//for testing
-//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObject(object *Object) error {
 
 	query := fmt.

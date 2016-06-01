@@ -224,7 +224,6 @@ func CategoriesWithParentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //post handlers
-
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -244,6 +243,8 @@ func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//for testing
+//curl -H "Content-Type: application/json" -X POST -d '{"description":"test object", "name": "yolo", "category_id":2}' http://localhost:8080/object
 func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
