@@ -250,6 +250,7 @@ func CategoriesWithParentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //post handlers
+
 func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -285,6 +286,7 @@ func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer dRBCRdLaRnNGTZGBxhVjYY8f9PM=" -X POST http://localhost:8080/balance/daniel/add=12
 func UserAddBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var username string

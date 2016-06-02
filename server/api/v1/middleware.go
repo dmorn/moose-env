@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -27,8 +26,7 @@ func MAuthMiddleware(inner http.Handler, name string) http.Handler {
 
 		start := time.Now()
 
-		token := tauth.Get(r)
-		fmt.Println(token)
+		//token := tauth.Get(r)
 		inner.ServeHTTP(w, r)
 
 		mLog(start, name, r)
