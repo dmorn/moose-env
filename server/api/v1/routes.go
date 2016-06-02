@@ -127,6 +127,13 @@ var routes = Routes{
 		RegistrationHandler,
 	},
 
+	//others
+	Route{
+		"User",
+		"POST",
+		"/add_stock_taker/{username}/{stock_id}",
+		AddStockTakerHandler,
+	},
 	Route{
 		"Object",
 		"POST",

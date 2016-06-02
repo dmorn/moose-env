@@ -43,30 +43,55 @@
 		<dict>
 			<key>connectionEncoding</key>
 			<string>latin1</string>
+			<key>contentFilter</key>
+			<dict/>
 			<key>contentPageNumber</key>
 			<integer>1</integer>
 			<key>contentSelection</key>
 			<data>
-			YnBsaXN0MDDUAQIDBAUGJCVYJHZlcnNpb25YJG9iamVjdHNZJGFy
-			Y2hpdmVyVCR0b3ASAAGGoKgHCBMUFRYaIVUkbnVsbNMJCgsMDxJX
-			TlMua2V5c1pOUy5vYmplY3RzViRjbGFzc6INDoACgAOiEBGABIAF
-			gAdUdHlwZVRyb3dzXxAdU2VsZWN0aW9uRGV0YWlsVHlwZU5TSW5k
-			ZXhTZXTSFwsYGVxOU1JhbmdlQ291bnQQAIAG0hscHR5aJGNsYXNz
-			bmFtZVgkY2xhc3Nlc1pOU0luZGV4U2V0oh8gWk5TSW5kZXhTZXRY
-			TlNPYmplY3TSGxwiI1xOU0RpY3Rpb25hcnmiIiBfEA9OU0tleWVk
-			QXJjaGl2ZXLRJidUZGF0YYABAAgAEQAaACMALQAyADcAQABGAE0A
-			VQBgAGcAagBsAG4AcQBzAHUAdwB8AIEAoQCmALMAtQC3ALwAxwDQ
-			ANsA3gDpAPIA9wEEAQcBGQEcASEAAAAAAAACAQAAAAAAAAAoAAAA
-			AAAAAAAAAAAAAAABIw==
+			YnBsaXN0MDDUAQIDBAUGOjtYJHZlcnNpb25YJG9iamVjdHNZJGFy
+			Y2hpdmVyVCR0b3ASAAGGoK4HCBUWFxgZHSQpLTE0OFUkbnVsbNMJ
+			CgsMEBRXTlMua2V5c1pOUy5vYmplY3RzViRjbGFzc6MNDg+AAoAD
+			gASjERITgAWABoAIgA1UdHlwZVRyb3dzVGtleXNfECZTZWxlY3Rp
+			b25EZXRhaWxUeXBlUHJpbWFyeUtleWVkRGV0YWlsc9MJCgsaGxyg
+			oIAH0h4fICFaJGNsYXNzbmFtZVgkY2xhc3Nlc18QE05TTXV0YWJs
+			ZURpY3Rpb25hcnmjICIjXE5TRGljdGlvbmFyeVhOU09iamVjdNIK
+			CyUooiYngAmAC4AM0gsqKyxZTlMuc3RyaW5ngApXdXNlcl9pZNIe
+			Hy4vXxAPTlNNdXRhYmxlU3RyaW5noy4wI1hOU1N0cmluZ9ILKisz
+			gApYc3RvY2tfaWTSHh81Nl5OU011dGFibGVBcnJheaM1NyNXTlNB
+			cnJhedIeHyI5oiIjXxAPTlNLZXllZEFyY2hpdmVy0Tw9VGRhdGGA
+			AQAIABEAGgAjAC0AMgA3AEYATABTAFsAZgBtAHEAcwB1AHcAewB9
+			AH8AgQCDAIgAjQCSALsAwgDDAMQAxgDLANYA3wD1APkBBgEPARQB
+			FwEZARsBHQEiASwBLgE2ATsBTQFRAVoBXwFhAWoBbwF+AYIBigGP
+			AZIBpAGnAawAAAAAAAACAQAAAAAAAAA+AAAAAAAAAAAAAAAAAAAB
+			rg==
 			</data>
 			<key>contentSortColIsAsc</key>
 			<true/>
 			<key>contentViewport</key>
-			<string>{{0, 0}, {694, 450}}</string>
+			<string>{{0, 0}, {1080, 517}}</string>
 			<key>isToolbarVisible</key>
 			<true/>
 			<key>queries</key>
-			<string>-- phpMyAdmin SQL Dump
+			<string>select * from user_stock where user_id == 1</string>
+			<key>table</key>
+			<string>user_stock</string>
+			<key>view</key>
+			<string>SP_VIEW_CUSTOMQUERY</string>
+			<key>windowVerticalDividerPosition</key>
+			<real>200</real>
+		</dict>
+	</dict>
+	<key>encrypted</key>
+	<false/>
+	<key>format</key>
+	<string>connection</string>
+	<key>queryFavorites</key>
+	<array/>
+	<key>queryHistory</key>
+	<array>
+		<string>select user_id from user_stock where user_id is 1</string>
+		<string>-- phpMyAdmin SQL Dump
 -- version 4.3.11
 -- http://www.phpmyadmin.net
 --
@@ -77,18 +102,10 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-
-
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
-
---
--- Datenbank: `makershare`
---
-
-DELIMITER $$
 --
 -- Funktionen
 --
@@ -116,10 +133,7 @@ BEGIN
 	END WHILE;
 
 	RETURN 0;
-END$$
-
-DELIMITER ;
-
+END;
 -- --------------------------------------------------------
 
 --
@@ -132,7 +146,6 @@ CREATE TABLE IF NOT EXISTS `category` (
   `name` varchar(40) NOT NULL,
   `description` text NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -144,7 +157,6 @@ CREATE TABLE IF NOT EXISTS `group` (
   `name` varchar(40) NOT NULL,
   `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -161,7 +173,6 @@ CREATE TABLE IF NOT EXISTS `group_items` (
 ,`group_id` int(11)
 ,`stock_id` int(11)
 );
-
 -- --------------------------------------------------------
 
 --
@@ -172,7 +183,6 @@ CREATE TABLE IF NOT EXISTS `group_request` (
   `group_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -185,7 +195,6 @@ CREATE TABLE IF NOT EXISTS `group_stocks` (
 ,`group_id` int(11)
 ,`user_id` int(11)
 );
-
 -- --------------------------------------------------------
 
 --
@@ -200,7 +209,6 @@ CREATE TABLE IF NOT EXISTS `item` (
   `object_id` int(11) NOT NULL,
   `stock_id` int(11) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -213,7 +221,6 @@ CREATE TABLE IF NOT EXISTS `object` (
   `description` text NOT NULL,
   `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -225,7 +232,6 @@ CREATE TABLE IF NOT EXISTS `stock` (
   `name` varchar(100) NOT NULL,
   `location` varchar(100) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -244,7 +250,6 @@ CREATE TABLE IF NOT EXISTS `user` (
   `verify_code` varchar(100) DEFAULT NULL,
   `group_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
@@ -255,25 +260,20 @@ CREATE TABLE IF NOT EXISTS `user_stock` (
   `user_id` int(11) NOT NULL,
   `stock_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 -- --------------------------------------------------------
 
 --
 -- Struktur des Views `group_items`
 --
 DROP TABLE IF EXISTS `group_items`;
-
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `group_items` AS select `item`.`item_id` AS `item_id`,`object`.`name` AS `name`,`object`.`description` AS `description`,`object`.`category_id` AS `category_id`,`item`.`coins` AS `coins`,`item`.`quantity` AS `quantity`,`stock`.`name` AS `stock_name`,`user`.`group_id` AS `group_id`,`stock`.`stock_id` AS `stock_id` from ((((`item` join `object` on((`item`.`object_id` = `object`.`object_id`))) join `stock` on((`item`.`stock_id` = `stock`.`stock_id`))) join `user_stock` on((`item`.`stock_id` = `user_stock`.`stock_id`))) join `user` on((`user_stock`.`user_id` = `user`.`user_id`)));
-
 -- --------------------------------------------------------
 
 --
 -- Struktur des Views `group_stocks`
 --
 DROP TABLE IF EXISTS `group_stocks`;
-
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `group_stocks` AS select `stock`.`stock_id` AS `stock_id`,`stock`.`name` AS `name`,`stock`.`location` AS `location`,`user`.`group_id` AS `group_id`,`user`.`user_id` AS `user_id` from ((`stock` join `user_stock` on((`stock`.`stock_id` = `user_stock`.`stock_id`))) join `user` on((`user_stock`.`user_id` = `user`.`user_id`)));
-
 --
 -- Indizes der exportierten Tabellen
 --
@@ -283,43 +283,36 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 ALTER TABLE `category`
   ADD PRIMARY KEY (`category_id`);
-
 --
 -- Indizes für die Tabelle `group`
 --
 ALTER TABLE `group`
   ADD PRIMARY KEY (`group_id`);
-
 --
 -- Indizes für die Tabelle `item`
 --
 ALTER TABLE `item`
   ADD PRIMARY KEY (`item_id`);
-
 --
 -- Indizes für die Tabelle `object`
 --
 ALTER TABLE `object`
   ADD PRIMARY KEY (`object_id`);
-
 --
 -- Indizes für die Tabelle `stock`
 --
 ALTER TABLE `stock`
   ADD PRIMARY KEY (`stock_id`);
-
 --
 -- Indizes für die Tabelle `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`user_id`), ADD UNIQUE KEY `username` (`username`);
-
 --
 -- Indizes für die Tabelle `user_stock`
 --
 ALTER TABLE `user_stock`
   ADD PRIMARY KEY (`user_id`,`stock_id`);
-
 --
 -- AUTO_INCREMENT für exportierte Tabellen
 --
@@ -351,22 +344,7 @@ ALTER TABLE `user`
   MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-</string>
-			<key>view</key>
-			<string>SP_VIEW_CUSTOMQUERY</string>
-			<key>windowVerticalDividerPosition</key>
-			<real>200</real>
-		</dict>
-	</dict>
-	<key>encrypted</key>
-	<false/>
-	<key>format</key>
-	<string>connection</string>
-	<key>queryFavorites</key>
-	<array/>
-	<key>queryHistory</key>
-	<array>
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */</string>
 		<string>select * from `user` where username LIKE 'matthias'</string>
 		<string>select * from `user` where username LIKE matthias</string>
 		<string>select * from user where username LIKE matthias</string>
@@ -385,8 +363,6 @@ ALTER TABLE `user`
 		<string>select * from category where isSubCategoryOf(category_id, category_id IS NULL) = 1</string>
 		<string>select * from category where isSubCategoryOf(category_id IS NULL) = 1</string>
 		<string>select * from category where isSubCategoryOf(category_id, 5) = 1</string>
-		<string>select * from category where isSubCategoryOf(category_id, IS NULL) = 1</string>
-		<string>select * from category where isSubCategoryOf(category_id, NULL) = 1</string>
 	</array>
 	<key>rdbms_type</key>
 	<string>mysql</string>

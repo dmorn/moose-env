@@ -66,7 +66,6 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //getter handlers specific
-
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := getUserFromToken(r)
@@ -283,6 +282,7 @@ func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(object)
+
 	if err = PostObject(object); err != nil {
 		http.Error(w, err.Error(), 500)
 	} else {
@@ -291,12 +291,63 @@ func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//private helpers
+//curl -H "Content-Type: application/json" -X POST http://localhost:8080/add_stock_taker/daniel/1
+func AddStockTakerHandler(w http.ResponseWriter, r *http.Request) {
 
+	vars := mux.Vars(r)
+	var username string
+	var stock_id int
+	var err error
+	var ok bool
+
+	if stock_id, err = strconv.Atoi(vars["stock_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//check user state -> must be a stock taker himself
+	if _, err := isUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+
+		if candidateStockTaker, err := GetUserByUsername(username); err != nil {
+			http.Error(w, err.Error(), 500)
+		} else {
+			if err := AddUserToStockTakers(candidateStockTaker, stock_id); err != nil {
+				http.Error(w, err.Error(), 500)
+			} else {
+				//success
+				json.NewEncoder(w).Encode(candidateStockTaker)
+			}
+		}
+	}
+}
+
+//private helpers
 func getUserFromToken(r *http.Request) (*User, error) {
 
 	token := tauth.Get(r)
 	username := token.Claims("id").(string)
 	return GetUserByUsername(username)
 
+}
+
+func isUserStockTaker(r *http.Request) (*User, error) {
+
+	token := tauth.Get(r)
+	username := token.Claims("id").(string)
+
+	if user, err := GetUserByUsername(username); err != nil {
+		return nil, err
+	} else {
+		if err := CheckUserIsStockTaker(user); err != nil {
+			return nil, err
+		}
+		return user, nil
+	}
 }

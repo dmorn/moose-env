@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -193,6 +194,20 @@ func GetUserByUsername(u string) (*User, error) {
 		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
 
 	return &user, err
+}
+
+func CheckUserIsStockTaker(user *User) error {
+
+	query := fmt.Sprintf("select user_id from user_stock where user_id = %d", user.Id)
+
+	if rows, err := db.Query(query); err != nil {
+		return err
+	} else {
+		if rows.Next() {
+			return nil
+		}
+		return errors.New("You're not in the Fight Club boy")
+	}
 }
 
 func GetObject(id int) (*Object, error) {
@@ -394,6 +409,16 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 }
 
 //POST
+
+func AddUserToStockTakers(user *User, id int) error {
+
+	query := fmt.
+		Sprintf("INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES (%d, %d)",
+		user.Id, id)
+
+	_, err := db.Query(query)
+	return err
+}
 
 func PostUser(user *User) error {
 
