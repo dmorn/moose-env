@@ -14,23 +14,17 @@ type Routes []Route
 var routes = Routes{
 
 	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-	},
-	Route{
 		"Objects",
 		"GET",
 		"/objects",
 		ObjectsHandler,
 	},
-	Route{
-		"Users",
-		"GET",
-		"/users",
-		UsersHandler,
-	},
+	//Route{
+	//	"Users",
+	//	"GET",
+	//	"/users",
+	//	UsersHandler,
+	//},
 	Route{
 		"Categories",
 		"GET",
@@ -66,7 +60,7 @@ var routes = Routes{
 	Route{
 		"User",
 		"GET",
-		"/users/id={user_id}",
+		"/user",
 		UserHandler,
 	},
 	Route{
