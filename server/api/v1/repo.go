@@ -108,6 +108,26 @@ func GetCategories() (*Categories, error) {
 	return &cats, nil
 }
 
+func GetCategoriesIDs() ([]sql.NullInt64, error) {
+
+	const query = `select category_id from category;`
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cats := make([]sql.NullInt64, 0)
+	for rows.Next() {
+		var id sql.NullInt64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		cats = append(cats, id)
+	}
+	return cats, nil
+}
+
 func GetGroups() (*Groups, error) {
 
 	const query = "select * from `group`"
@@ -509,6 +529,25 @@ func PostItem(item *Item, status int) error {
 		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,%d,%d);",
 		item.Id, item.Coins, item.Status, item.Quantity, item.ObjectId, item.StockId)
 
+	_, err := db.Query(query)
+	return err
+}
+
+func PostCategory(category *Category) error {
+
+	var query string
+
+	if category.ParentId.Valid {
+		query = fmt.
+			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES ('%d', '%s', '%s');",
+			category.ParentId.Int64, category.Name, category.Description)
+	} else {
+		query = fmt.
+			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES (NULL, '%s', '%s');",
+			category.Name, category.Description)
+	}
+
+	fmt.Println(query)
 	_, err := db.Query(query)
 	return err
 }

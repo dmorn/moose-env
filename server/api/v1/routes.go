@@ -191,4 +191,11 @@ var routes = Routes{
 		"/into_stock/{stock_id}",
 		PutPurchasesIntoStockHandler,
 	},
+
+	Route{
+		"Category",
+		"POST",
+		"/category",
+		PostCategoryHandler,
+	},
 }
