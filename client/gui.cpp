@@ -7,7 +7,6 @@ Gui::Gui(){
     scrollPos=0;
 	title="Test";
 	currMenu = MAIN_MENU;
-	selectedItem = NULL;
     currCategoryId=0;
 	addItem=false;
 }
@@ -70,23 +69,16 @@ void Gui::update(int keycode) {
 		{
 			auto response = cpr::Get(cpr::Url{"http://localhost:8080/categories/id="+to_string(items.at(selectedMenuItem).getParentId())});
 			auto cat = nlohmann::json::parse(response.text);	
-			auto p_id = cat["parent_id"];
-            currCategoryId = p_id["Int64"];		
+            currCategoryId = cat["parent_id"]["Int64"];		
 			list();
 		}
 		else if(currMenu == OBJ_BY_CAT_LIST)
 		{
-			currMenu  = CATEGORY_LIST;
 			clearMenu();
-			list();
+			list(CATEGORY_LIST);
 		}
 		else{
 			selectedMenuItem=0;
-			if(currMenu == CATEGORY_LIST)
-				selectedMenuItem=1;
-			if(currMenu == STOCK_LIST)
-				selectedMenuItem=2;
-			currMenu = MAIN_MENU;
 			mainMenu();
 		}
 	}
@@ -98,11 +90,30 @@ void Gui::update(int keycode) {
 			list();	
 
         else if(currMenu == CATEGORY_LIST) {
+
+			if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
+			{
+				currCategoryId = items.at(selectedMenuItem).getId();
+				list();
+			}
+			else{
+				bool ok = popupYesNo("No subcategories, search in this category? (y/n)");
+				if(ok){
+					currCategoryId = items.at(selectedMenuItem).getId();
+					if(addItem)
+						list(OBJ_BY_CAT_LIST);
+					else
+						list(ITEM_LIST);
+				}
+			}	
+
 			if(items.at(selectedMenuItem).getId() == 0) {
 
 	        	currCategoryId = items.at(selectedMenuItem).getId();
 				list();	
 			}
+
+			/*
 			else if(addItem) {
 				if(hasResult("objects/cat="+to_string(items.at(selectedMenuItem).getId())))
 				{
@@ -114,10 +125,27 @@ void Gui::update(int keycode) {
 					popupMessage("No such items.");
 				}	
 			}
+			else {
+				if(hasResult("items/start_cat_id="+to_string(items.at(selectedMenuItem).getId()))) {
+			    	currCategoryId = items.at(selectedMenuItem).getId();
+					currMenu = ITEM_LIST;
+					list();	
+				}
+				else{
+					popupMessage("No such items.");
+				}	
+			}*/
 		}
 
 		else if(currMenu == ADD_ITEM_PAGE){
-			addItemPage();
+			addItem=true;
+			list(CATEGORY_LIST);
+		}
+		else if(currMenu == BUY_ITEM_PAGE){
+			int quantity = popupNumber("Quantity: ");
+			bool ok = popupYesNo("Order " + to_string(quantity) + "x " +selectedItem.getName()+ " for " + 
+								to_string(selectedItem.getCoins() * quantity) + " coins?");
+			
 		}
 
 		else if(currMenu == ITEM_PAGE) {
@@ -133,35 +161,36 @@ void Gui::update(int keycode) {
 
 	else if(keycode == 9)
 	{
-		currMenu=CATEGORY_LIST;
-		if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
-		{
-		    currCategoryId = items.at(selectedMenuItem).getId();
+		if(currMenu == ITEM_LIST) {
+			currCategoryId=0;
+			currMenu=CATEGORY_LIST;
 			list();
 		}
-		else{
-			popupMessage("No further subcategories.");
-		}	
-
+		else if (currMenu == CATEGORY_LIST){
+			if(addItem)
+			{	
+				if(currCategoryId==0)
+				{
+					popupMessage("Please specify the category.");
+				}
+				else
+					list(OBJ_BY_CAT_LIST);
+			}
+			else
+				list(ITEM_LIST);				
+		}
 	}
 	print();
 }
 
 void Gui::mainMenu(){
 	
+	currMenu = MAIN_MENU;
     clearMenu();
 	title = "Moose env.";
    	addMenuItem(Item("Item List", ITEM_LIST));
    	addMenuItem(Item("Add item",ADD_ITEM_PAGE));
    	addMenuItem(Item("Stock list",STOCK_LIST));
-}
-void Gui::addItemPage() {
-	
-	title = "Add Item";
-	addItem=true;
-    clearMenu();
-	addMenuItem(Item("Select category",CATEGORY_LIST));
-
 }
 
 void Gui::addItemPage(Item item) {
@@ -172,48 +201,51 @@ void Gui::addItemPage(Item item) {
 	addMenuItem(Item(item.getName(),CATEGORY_LIST));
 
     std::system("clear");	
-	string res="";
-	while(!isNumber(res))
-		res = popupInput("Quantity:");
-    int quantity = stoi(res);
-	res="";
-	while(!isNumber(res))
-		res = popupInput("Coins:");
-    int coins = stoi(res);
-	string input;
-	while(input != "y" && input != "n")
-		input = popupInput("Add: "+to_string(quantity) +"x " +item.getName() + " for " + to_string(coins) + " coins? (y/n)");
+    int quantity = popupNumber("Quantity:");
+    int coins = popupNumber("Coins:");
+	bool add = popupYesNo("Add: "+to_string(quantity) +"x " +item.getName() + " for " + to_string(coins) + " coins? (y/n)");
+	
+	int stock_id=0;
+	Item newItem = Item(item.getName(),-1,item.getDescription(), coins, quantity, stock_id, item.getId());
 
+
+	json newItemJson = {
+	  {"status", 1},
+	  {"coins", coins},
+	  {"quantity", quantity},
+	  {"stock_id", stock_id},
+	  {"object_id", item.getId()},
+	};
+	auto r = cpr::Post(cpr::Url{"http://localhost:8080/item"},
+	cpr::Body{newItemJson.dump()},
+	cpr::Header{{"Content-Type", "application/json"}});
+	auto json = nlohmann::json::parse(r.text);
 	addItem=false;
-	if(input == "y")
-		itemPage(item);
+	int newId = json.back()["id"];
+	newItem.setId(newId);
+	if(add)
+		itemPage(newItem);
 
 	else mainMenu();
+	currCategoryId=0;
 }
 
-bool Gui::isNumber(string s) {
-	
-	if(s.size() == 0) return false;
-	for(int i=0; i < s.size(); i++)
-		if((int)s[i] < 48 || (int)s[i] > 57)
-			return false;
-	return true;
+string Gui::centerText(string t, int w) {
+	string o;
+	int l = w/2 - t.size()/2;
+	int r = w - l - t.size();
+	for(; l>0; l--) o+=" ";
+	o+=t;
+	for(; r>0; r--) o+=" ";
+	return o;
 }
 
-string Gui::centerText(string text, int width) {
-
-	string out;
-	int l_space = width/2 - text.size()/2;
-	int r_space = width - text.size() - l_space;
-	
-	for(int i=0; i< l_space; i++)
-		out += " ";
-	out+= text;
-	for(int i=0; i< r_space; i++)
-		out += " ";
-	return out;
+bool Gui::popupYesNo(string text) {
+	string res = "";
+	while(res != "y" && res != "n")
+		res = popupInput(text);
+	return res=="y";
 }
-
 
 void Gui::popupMessage(string text) {
 
@@ -226,7 +258,13 @@ void Gui::popupMessage(string text) {
     cout << "\t+------------------------------------------------+" << endl;
 	getchar();
     std::system("clear");	   
-	list();
+}
+
+int Gui::popupNumber(string text) {
+	string res="";
+	while(!isNumber(res))
+		res = popupInput(text);
+    return stoi(res);
 }
 
 string Gui::popupInput(string text) {
@@ -243,11 +281,25 @@ string Gui::popupInput(string text) {
 	return input;
 }
 
+bool Gui::isNumber(string s) {
+	
+	if(s.size() == 0) return false;
+	for(int i=0; i < s.size(); i++)
+		if((int)s[i] < 48 || (int)s[i] > 57)
+			return false;
+	return true;
+}
+
 void Gui::itemPage(Item item){
 	
     clearMenu();
 	title = "Item nr." + to_string(item.getId()) + " - " + item.getName();
+	selectedItem = item;
 	addMenuItem(Item(item.getDescription(),"asd"));
+	addMenuItem(Item("Coins:\t" + to_string(item.getCoins()),"asd"));
+	addMenuItem(Item("Quantity:\t" + to_string(item.getQuantity()),"asd"));
+	addMenuItem(Item("Stock:\t" + to_string(item.getStockId()),"asd"));
+	addMenuItem(Item("Buy Item",BUY_ITEM_PAGE));
 
 }
 
@@ -261,13 +313,31 @@ void Gui::list(){
 	if(currMenu == ITEM_LIST){
 		title = "Items";
 
-		auto response = cpr::Get(cpr::Url{"http://localhost:8080/items"});
-		auto json = nlohmann::json::parse(response.text);	
+		auto response = cpr::Get(cpr::Url{"http://localhost:8080/items/start_cat_id="+to_string(currCategoryId)});
+		auto json = nlohmann::json::parse(response.text);
+		clearMenu();
+		if(json.size() > 0)
+		{
+			for (auto& item : json) {
+				nlohmann::json object = item["object"];
+				items.push_back(Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],(int)item["stock_id"],(int)item["object_id"]));
+			}
+			
+			title = to_string(items.size()) + " Items found";
 
-        clearMenu();
-		for (auto& item : json) {
-		    nlohmann::json object = item["object"];
-		    items.push_back(Item(object["name"],(int)item["id"],object["description"]));
+		}
+		else if(currCategoryId != 0)
+		{	
+			getchar();
+			popupMessage("No items found, removing category filter");
+			currCategoryId=0;
+			list();
+		}	
+		else {
+			getchar();
+			popupMessage("No items found.");
+   			clearMenu();
+			mainMenu();
 		}
 	}	
 
@@ -276,10 +346,9 @@ void Gui::list(){
 		if(addItem) title += " - SELECT ITEM CATEGORY";
         
 		auto response = cpr::Get(cpr::Url{"http://localhost:8080/categories/parent_id="+to_string(currCategoryId)});
-		auto json = nlohmann::json::parse(response.text);	
 
 	    clearMenu();
-		for (auto& item : json) {
+		for (auto& item : nlohmann::json::parse(response.text)) {
 			items.push_back(Item(item["name"],(int)item["id"],item["description"],currCategoryId));
 		}
 	}	
@@ -288,10 +357,9 @@ void Gui::list(){
 		title = "Select Object type";
         
 		auto response = cpr::Get(cpr::Url{"http://localhost:8080/objects/cat="+to_string(currCategoryId)});
-		auto json = nlohmann::json::parse(response.text);	
 
 	    clearMenu();
-		for (auto& item : json) {
+		for (auto& item : nlohmann::json::parse(response.text)) {
 			items.push_back(Item(item["name"],(int)item["id"],item["description"]));
 		}
 	}
@@ -308,8 +376,7 @@ void Gui::list(){
 
 bool Gui::hasResult(string query) {	
 	auto response = cpr::Get(cpr::Url{"http://localhost:8080/"+query});
-	auto json = nlohmann::json::parse(response.text);	
-	return json.size() > 0;
+	return nlohmann::json::parse(response.text).size() > 0;
 }
 
 void Gui::print() {
@@ -319,7 +386,7 @@ void Gui::print() {
     std::system("clear");	   
 	
     cout << "+----------------------------------------------------------------+" << endl;
-	cout << "|"+centerText(currMenu + " - " + title,64) + "|" << endl;
+	cout << "|"+centerText(currMenu + " - " + title + " - " + to_string(currCategoryId),64) + "|" << endl;
     cout << "+----------------------------------------------------------------+" << endl;
 
     for(int i=scrollPos; i<MENU_ITEMS + scrollPos; i++)
