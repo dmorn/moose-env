@@ -13,14 +13,6 @@ type Routes []Route
 
 var routes = Routes{
 
-	//login related stuff
-	Route{
-		"Login",
-		"POST",
-		"/login",
-		LoginHandler,
-	},
-
 	Route{
 		"Index",
 		"GET",
@@ -127,6 +119,20 @@ var routes = Routes{
 	},
 
 	//posts
+	//login related stuff
+	Route{
+		"Login",
+		"POST",
+		"/login",
+		LoginHandler,
+	},
+	Route{
+		"Register",
+		"POST",
+		"/register",
+		RegistrationHandler,
+	},
+
 	Route{
 		"Object",
 		"POST",

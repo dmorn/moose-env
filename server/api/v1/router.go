@@ -27,7 +27,12 @@ func NewRouter() *mux.Router {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = MMiddleware(handler, route.Name)
+
+		if route.Name == "Login" || route.Name == "Register" {
+			handler = MMiddleware(handler, route.Name)
+		} else {
+			handler = MAuthMiddleware(handler, route.Name)
+		}
 
 		router.
 			Methods(route.Method).

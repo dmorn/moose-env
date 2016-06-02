@@ -19,8 +19,7 @@ type User struct {
 	Balance    int            `json:"balance"`
 	Type       int            `json:"type"`
 	VerifyCode sql.NullString `json:"verify_code"`
-	GroupId    sql.NullString `json:"group_id"`
-	Salt       []byte         `json:"salt"`
+	GroupId    int            `json:"group_id"`
 }
 
 type Users []User
@@ -48,9 +47,7 @@ type Stock struct {
 type Stocks []Stock
 
 type Group struct {
-	Id          string `json:"id"` //TODO: please change this into an integer id
-	Description string `json:"description"`
-	Name        string `json:"name"`
+	BaseInfo
 }
 
 type Groups []Group

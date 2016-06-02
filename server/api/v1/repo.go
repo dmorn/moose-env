@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"os"
@@ -76,7 +78,7 @@ func GetUsers() (*Users, error) {
 		user := User{}
 
 		if err := rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId); err != nil {
+			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -177,7 +179,7 @@ func GetUser(id int) (*User, error) {
 
 	user := User{}
 	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId)
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
 
 	return &user, err
 }
@@ -188,7 +190,7 @@ func GetUserByUsername(u string) (*User, error) {
 
 	user := User{}
 	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.Salt, &user.GroupId)
+		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
 
 	return &user, err
 }
@@ -392,6 +394,22 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 }
 
 //POST
+
+func PostUser(user *User) error {
+
+	hasher := sha256.New()
+	hasher.Write([]byte(user.Password))
+	hash := hex.EncodeToString(hasher.Sum(nil))
+
+	query := fmt.
+		Sprintf("INSERT INTO `user` (`username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES ('%s', '%s', '%s', '%s', '%s', 0, 1, %d)",
+		user.Username, hash, user.Email, user.Name, user.Surname, user.GroupId)
+
+	fmt.Println(query)
+	_, err := db.Query(query)
+	return err
+}
+
 func PostObject(object *Object) error {
 
 	query := fmt.
