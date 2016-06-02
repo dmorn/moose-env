@@ -167,6 +167,7 @@ func GetItems() (*Items, error) {
 			return nil, err
 		}
 		item.Object, _ = GetObject(item.ObjectId)
+		item.Stock, _ = GetStock(item.StockId)
 		items = append(items, item)
 	}
 	return &items, nil
@@ -353,7 +354,19 @@ func GetItem(id int) (*Item, error) {
 	}
 
 	item.Object, err = GetObject(item.ObjectId)
+	item.Stock, err = GetStock(item.StockId)
 	return &item, err
+}
+
+func GetStock(id int) (*Stock, error) {
+
+	query := fmt.Sprintf("select * from stock where stock_id = %d", id)
+
+	stock := Stock{}
+	err := db.QueryRow(query).
+		Scan(&stock.Id, &stock.Name, &stock.Location)
+
+	return &stock, err
 }
 
 func GetItemByCategory(categoryID int) (*Items, error) {

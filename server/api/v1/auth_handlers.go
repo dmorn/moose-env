@@ -213,6 +213,24 @@ func CategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func StockHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var stockID int
+	var err error
+
+	if stockID, err = strconv.Atoi(vars["stock_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if stock, err := GetStock(stockID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(stock)
+	}
+
+}
+
 func CategoriesWithSubcategoriesHandeler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

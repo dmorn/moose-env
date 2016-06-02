@@ -94,6 +94,12 @@ var routes = Routes{
 		ItemsWithCategoriesAndSubcategoriesHandler,
 	},
 	Route{
+		"Stocks",
+		"GET",
+		"/stock/id={stock_id}",
+		StockHandler,
+	},
+	Route{
 		"Category",
 		"GET",
 		"/categories/id={category_id}",
