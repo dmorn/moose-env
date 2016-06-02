@@ -56,19 +56,10 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ItemsHandler(w http.ResponseWriter, r *http.Request) {
-
-	if items, err := GetItems(); err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		json.NewEncoder(w).Encode(items)
-	}
-}
-
 //getter handlers specific
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 
-	user, err := getUserFromToken(r)
+	user, err := GetUserFromToken(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), 500)
@@ -132,63 +123,6 @@ func ObjectsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http
 		http.Error(w, err.Error(), 404)
 	} else {
 		json.NewEncoder(w).Encode(objects)
-	}
-}
-
-func ItemHandler(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-	var itemID int
-	var categoryID int
-
-	var err1 error
-	var err2 error
-
-	itemID, err1 = strconv.Atoi(vars["item_id"])
-	categoryID, err2 = strconv.Atoi(vars["category_id"])
-
-	if err1 != nil && err2 != nil {
-		http.Error(w, err1.Error(), 500)
-		return
-	}
-
-	var item *Item
-	var items *Items
-	var err error
-
-	if itemID > 0 {
-		item, err = GetItem(itemID)
-	} else if categoryID > 0 {
-		items, err = GetItemByCategory(categoryID)
-	}
-
-	if err != nil {
-		http.Error(w, err.Error(), 404)
-	} else {
-		if item != nil {
-			json.NewEncoder(w).Encode(item)
-		}
-		if items != nil {
-			json.NewEncoder(w).Encode(items)
-		}
-	}
-}
-
-func ItemsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-	var catID int
-	var err error
-
-	if catID, err = strconv.Atoi(vars["category_id"]); err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	if items, err := GetItemsWithCategoriesAndSubcategories(catID); err != nil {
-		http.Error(w, err.Error(), 404)
-	} else {
-		json.NewEncoder(w).Encode(items)
 	}
 }
 
@@ -277,7 +211,7 @@ func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var ok bool
 
-	if _, err = isUserStockTaker(r); err != nil {
+	if _, _, err = IsUserStockTaker(r); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
@@ -312,7 +246,7 @@ func UserAddBalance(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var ok bool
 
-	if _, err = isUserStockTaker(r); err != nil {
+	if _, _, err = IsUserStockTaker(r); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
@@ -336,25 +270,6 @@ func UserAddBalance(w http.ResponseWriter, r *http.Request) {
 			user.Balance = user.Balance + amount
 			json.NewEncoder(w).Encode(user) //should return 201
 		}
-	}
-}
-
-func PostItemHandler(w http.ResponseWriter, r *http.Request) {
-
-	decoder := json.NewDecoder(r.Body)
-	var item *Item
-	err := decoder.Decode(&item)
-	if err != nil {
-		fmt.Println("Error Decoding Form")
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	if err = PostItem(item); err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		items, _ := GetItems()
-		json.NewEncoder(w).Encode(items) //should return 201
 	}
 }
 
@@ -401,7 +316,7 @@ func AddStockTakerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//check user state -> must be a stock taker himself
-	if _, err := isUserStockTaker(r); err != nil {
+	if _, _, err := IsUserStockTaker(r); err != nil {
 		http.Error(w, err.Error(), 500)
 	} else {
 
@@ -418,8 +333,8 @@ func AddStockTakerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//private helpers
-func getUserFromToken(r *http.Request) (*User, error) {
+//helpers -- usable only in tauth environment
+func GetUserFromToken(r *http.Request) (*User, error) {
 
 	token := tauth.Get(r)
 	username := token.Claims("id").(string)
@@ -427,17 +342,15 @@ func getUserFromToken(r *http.Request) (*User, error) {
 
 }
 
-func isUserStockTaker(r *http.Request) (*User, error) {
+func IsUserStockTaker(r *http.Request) (*User, []int, error) {
 
-	token := tauth.Get(r)
-	username := token.Claims("id").(string)
-
-	if user, err := GetUserByUsername(username); err != nil {
-		return nil, err
+	if user, err := GetUserFromToken(r); err != nil {
+		return nil, nil, err
 	} else {
-		if err := CheckUserIsStockTaker(user); err != nil {
-			return nil, err
+		if list, err := CheckUserIsStockTaker(user); err != nil {
+			return nil, nil, err
+		} else {
+			return user, list, nil
 		}
-		return user, nil
 	}
 }

@@ -31,18 +31,21 @@ var routes = Routes{
 		"/categories",
 		CategoriesHandler,
 	},
+
 	Route{
 		"Groups",
 		"GET",
 		"/groups",
 		GroupsHandler,
 	},
+
 	Route{
 		"Stocks",
 		"GET",
 		"/stocks",
 		StocksHandler,
 	},
+
 	Route{
 		"Items",
 		"GET",
@@ -63,6 +66,7 @@ var routes = Routes{
 		"/user",
 		UserHandler,
 	},
+
 	Route{
 		"Object",
 		"GET",
@@ -75,6 +79,7 @@ var routes = Routes{
 		"/objects/start_cat_id={category_id}",
 		ObjectsWithCategoriesAndSubcategoriesHandler,
 	},
+
 	Route{
 		"Item",
 		"GET",
@@ -94,11 +99,19 @@ var routes = Routes{
 		ItemsWithCategoriesAndSubcategoriesHandler,
 	},
 	Route{
+		"Item",
+		"POST",
+		"/purchase/{item_id}",
+		PurchaseItemHandler,
+	},
+
+	Route{
 		"Stocks",
 		"GET",
 		"/stock/id={stock_id}",
 		StockHandler,
 	},
+
 	Route{
 		"Category",
 		"GET",
@@ -152,16 +165,30 @@ var routes = Routes{
 		"/balance/{username}/add={amount}",
 		UserAddBalance,
 	},
+
 	Route{
 		"Object",
 		"POST",
 		"/object",
 		PostObjectHandler,
 	},
+
 	Route{
 		"Item",
 		"POST",
 		"/item",
 		PostItemHandler,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/purchase_wishlist/{stock_id}",
+		PurchaseWishlistHandler,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/into_stock/{stock_id}",
+		PutPurchasesIntoStockHandler,
 	},
 }

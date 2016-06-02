@@ -90,6 +90,10 @@
 	<array/>
 	<key>queryHistory</key>
 	<array>
+		<string>select user_id from user_stock where user_id = 1</string>
+		<string>select * from user_stock where user_id = 1</string>
+		<string>select * from user_stock where user_id is 1</string>
+		<string>select * from user_stock where user_id == 1</string>
 		<string>select user_id from user_stock where user_id is 1</string>
 		<string>-- phpMyAdmin SQL Dump
 -- version 4.3.11
@@ -359,10 +363,6 @@ ALTER TABLE `user`
 		<string>select * from group_items where isSubCategoryOf(category_id, 1) = 1</string>
 		<string>select * from group_items where isSubCategoryOf(category_id, 2) = 1</string>
 		<string>select * from group_items where category_id = 2</string>
-		<string>select * from category where isSubCategoryOf(category_id, 1) = 1</string>
-		<string>select * from category where isSubCategoryOf(category_id, category_id IS NULL) = 1</string>
-		<string>select * from category where isSubCategoryOf(category_id IS NULL) = 1</string>
-		<string>select * from category where isSubCategoryOf(category_id, 5) = 1</string>
 	</array>
 	<key>rdbms_type</key>
 	<string>mysql</string>
