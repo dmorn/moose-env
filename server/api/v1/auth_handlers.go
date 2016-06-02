@@ -250,6 +250,75 @@ func CategoriesWithParentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //post handlers
+func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var username string
+	var amount int
+	var err error
+	var ok bool
+
+	if _, err = isUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if amount, err = strconv.Atoi(vars["amount"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if user, err := GetUserByUsername(username); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		if err = WithdrawAmountToUserBalance(user, amount); err != nil {
+			http.Error(w, err.Error(), 500)
+		} else {
+			user.Balance = user.Balance - amount
+			json.NewEncoder(w).Encode(user) //should return 201
+		}
+	}
+}
+
+func UserAddBalance(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var username string
+	var amount int
+	var err error
+	var ok bool
+
+	if _, err = isUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	if amount, err = strconv.Atoi(vars["amount"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if user, err := GetUserByUsername(username); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		if err = AddAmountToUserBalance(user, amount); err != nil {
+			http.Error(w, err.Error(), 500)
+		} else {
+			user.Balance = user.Balance + amount
+			json.NewEncoder(w).Encode(user) //should return 201
+		}
+	}
+}
+
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -291,7 +360,8 @@ func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//curl -H "Content-Type: application/json" -X POST http://localhost:8080/add_stock_taker/daniel/1
+//for tests. Remember to use an authenticated token
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer G-ibUdic9Zjd0bk3qS5DHQg5ZFs=" -X POST http://localhost:8080/add_stock_taker/daniel/1
 func AddStockTakerHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

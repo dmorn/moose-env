@@ -435,6 +435,26 @@ func PostUser(user *User) error {
 	return err
 }
 
+func AddAmountToUserBalance(user *User, amount int) error {
+
+	balance := amount + user.Balance
+	query := fmt.
+		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d", balance, user.Id)
+
+	_, err := db.Query(query)
+	return err
+}
+
+func WithdrawAmountToUserBalance(user *User, amount int) error {
+
+	balance := user.Balance - amount
+	query := fmt.
+		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d", balance, user.Id)
+
+	_, err := db.Query(query)
+	return err
+}
+
 func PostObject(object *Object) error {
 
 	query := fmt.

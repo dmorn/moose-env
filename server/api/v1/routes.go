@@ -135,6 +135,18 @@ var routes = Routes{
 		AddStockTakerHandler,
 	},
 	Route{
+		"User",
+		"POST",
+		"/balance/{username}/withdraw={amount}",
+		UserWithdrawBalance,
+	},
+	Route{
+		"User",
+		"POST",
+		"/balance/{username}/add={amount}",
+		UserAddBalance,
+	},
+	Route{
 		"Object",
 		"POST",
 		"/object",
