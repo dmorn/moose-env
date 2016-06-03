@@ -15,7 +15,12 @@ using namespace std;
 using json = nlohmann::json;
 class Gui{
 	
-	#define MENU_ITEMS 10
+	#define MENU_ITEMS 15
+	#define DISPLAY_WIDTH 66
+	#define POPUP_WIDTH 48
+	
+
+
 	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
@@ -28,6 +33,7 @@ class Gui{
 	#define BUY_ITEM_PAGE "BIP"
 	#define PROFILE "PRO"
 	#define WISHLIST "PRO"
+	#define TEXT_POPUP "TPP"
 
 	public:
 		Gui();
@@ -49,11 +55,13 @@ class Gui{
 		string popupInput(string text);
 		void popupMessage(string text);
 		string centerText(string text, int width);
+		string fillWithSpace(int cnt);
+		string limitText(string text);
 		bool isNumber(string s);
 		json getJson(string content);
 		json postJson(string content, json data);
 		json postJsonNoToken(string content, json data);
-		string title;
+		string title, footer;
 		int selectedMenuItem, tmpSelectedMenuItem;
 		int scrollPos;
 		string currMenu;

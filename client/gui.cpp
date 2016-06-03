@@ -5,6 +5,7 @@ Gui::Gui(){
 	tmpSelectedMenuItem=-1;
     scrollPos=0;
 	title="Test";
+	footer="moose.env v.1";
 	currMenu = LOGIN;
     currCategoryId=0;
 	addItem=false;
@@ -90,80 +91,88 @@ void Gui::update(int keycode) {
 		}
 		else if(keycode == 10 && items.at(selectedMenuItem).getFunction() != "nil")
 		{
-		   	currMenu = items.at(selectedMenuItem).getFunction();
+			if(items.at(selectedMenuItem).getFunction() == TEXT_POPUP)	//temporary menu change, no need to change currMenu
+			{
+				popupMessage(items.at(selectedMenuItem).getName());
 
-			if(currMenu == ITEM_LIST || currMenu == PROFILE) 
-				list();	
+			}
+			else {
 
-		    if(currMenu == CATEGORY_LIST) {
+			   	currMenu = items.at(selectedMenuItem).getFunction();
 
-				if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
-				{
-					currCategoryId = items.at(selectedMenuItem).getId();
-					list();
-				}
-				else{
-					bool ok = popupYesNo("No subcategories, search in this category? (y/n)");
-					if(ok){
-						currCategoryId = items.at(selectedMenuItem).getId();
-						if(addItem)
-							list(OBJ_BY_CAT_LIST);
-						else
-							list(ITEM_LIST);
-					}
-				}	
-
-				if(items.at(selectedMenuItem).getId() == 0) {
-
-			    	currCategoryId = items.at(selectedMenuItem).getId();
+				if(currMenu == ITEM_LIST || currMenu == PROFILE) 
 					list();	
-				}
 
-				/*
-				else if(addItem) {
-					if(hasResult("objects/cat="+to_string(items.at(selectedMenuItem).getId())))
+				if(currMenu == CATEGORY_LIST) {
+
+					if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
 					{
-				    	currCategoryId = items.at(selectedMenuItem).getId();
-						currMenu = OBJ_BY_CAT_LIST;
-						list();		
+						currCategoryId = items.at(selectedMenuItem).getId();
+						list();
 					}
 					else{
-						popupMessage("No such items.");
+						bool ok = popupYesNo("No subcategories, search in this category? (y/n)");
+						if(ok){
+							currCategoryId = items.at(selectedMenuItem).getId();
+							if(addItem)
+								list(OBJ_BY_CAT_LIST);
+							else
+								list(ITEM_LIST);
+						}
 					}	
-				}
-				else {
-					if(hasResult("items/start_cat_id="+to_string(items.at(selectedMenuItem).getId()))) {
+
+					if(items.at(selectedMenuItem).getId() == 0) {
+
 						currCategoryId = items.at(selectedMenuItem).getId();
-						currMenu = ITEM_LIST;
 						list();	
 					}
-					else{
-						popupMessage("No such items.");
-					}	
-				}*/
-			}
 
-			else if(currMenu == ADD_ITEM_PAGE || currMenu == ADD_STOCK_PAGE){
-				addItem=true;
-				if(currMenu == ADD_STOCK_PAGE)
-					addItemToStock=true;
-				
-				list(CATEGORY_LIST);
-			}
-			else if(currMenu == BUY_ITEM_PAGE){
-				int quantity = popupNumber("Quantity: ");
-				bool ok = popupYesNo("Order " + to_string(quantity) + "x " +selectedItem.getName()+ " for " + 
-									to_string(selectedItem.getCoins() * quantity) + " coins?");
-			
-			}
-
-			else if(currMenu == ITEM_PAGE) {
-				if(addItem) {
-					addItemPage(items.at(selectedMenuItem));
+					/*
+					else if(addItem) {
+						if(hasResult("objects/cat="+to_string(items.at(selectedMenuItem).getId())))
+						{
+							currCategoryId = items.at(selectedMenuItem).getId();
+							currMenu = OBJ_BY_CAT_LIST;
+							list();		
+						}
+						else{
+							popupMessage("No such items.");
+						}	
+					}
+					else {
+						if(hasResult("items/start_cat_id="+to_string(items.at(selectedMenuItem).getId()))) {
+							currCategoryId = items.at(selectedMenuItem).getId();
+							currMenu = ITEM_LIST;
+							list();	
+						}
+						else{
+							popupMessage("No such items.");
+						}	
+					}*/
 				}
-				else {
-					tmpSelectedMenuItem = selectedMenuItem;
-					itemPage(items.at(selectedMenuItem));
+
+				else if(currMenu == ADD_ITEM_PAGE || currMenu == ADD_STOCK_PAGE){
+					addItem=true;
+					if(currMenu == ADD_STOCK_PAGE)
+						addItemToStock=true;
+				
+					list(CATEGORY_LIST);
+				}
+				else if(currMenu == BUY_ITEM_PAGE){
+					int quantity = popupNumber("Quantity: ");
+					bool ok = popupYesNo("Order " + to_string(quantity) + "x " +selectedItem.getName()+ " for " + 
+										to_string(selectedItem.getCoins() * quantity) + " coins?");
+			
+				}
+
+				else if(currMenu == ITEM_PAGE) {
+					if(addItem) {
+						addItemPage(items.at(selectedMenuItem));
+					}
+					else {
+						tmpSelectedMenuItem = selectedMenuItem;
+						itemPage(items.at(selectedMenuItem));
+					}
 				}
 			}
 		}
@@ -233,6 +242,7 @@ void Gui::mainMenu(){
 	addItem=false;
 	addItemToStock=false;
 	title = "Welcome " + user.getName() + " to Moose env.";
+	footer="moose.env v.1";
    	addMenuItem(Item("Item List", ITEM_LIST));
    	addMenuItem(Item("Add item to stock",ADD_STOCK_PAGE));
    	addMenuItem(Item("Add item to wishlist",ADD_ITEM_PAGE));
@@ -284,11 +294,14 @@ bool Gui::popupYesNo(string text) {
 void Gui::popupMessage(string text) {
 
     std::system("clear");	   
-    cout << "\n\n\t+------------------------------------------------+" << endl;
-	cout << "\t|"+centerText(text,48) +"|" << endl;
-    cout << "\t+------------------------------------------------+" << endl;
-	cout << "\t|"+centerText("Press Enter to continue.",48) +"|" << endl;
-    cout << "\t+------------------------------------------------+" << endl;
+    cout << endl << endl;
+
+	cout << centerText("+------------------------------------------------+",DISPLAY_WIDTH) << endl;
+	for (unsigned i = 0; i < text.length(); i += POPUP_WIDTH - 4)
+		cout << centerText("| "+centerText(text.substr(i, POPUP_WIDTH - 4),POPUP_WIDTH -2) +" |" ,DISPLAY_WIDTH) << endl;
+	cout << centerText("+------------------------------------------------+",DISPLAY_WIDTH) << endl;
+	cout << centerText("|"+centerText("Press Enter to continue.",POPUP_WIDTH) +"|" ,DISPLAY_WIDTH) << endl;
+	cout << centerText("+------------------------------------------------+",DISPLAY_WIDTH) << endl;
 	getchar();
     std::system("clear");	   
 }
@@ -304,7 +317,7 @@ string Gui::popupInput(string text) {
 
     std::system("clear");	   
 	cout << "\n\n\t+------------------------------------------------+" << endl;
-	cout << "\t|"+centerText(text,48) +"|" << endl;
+	cout << centerText("|"+centerText(text,POPUP_WIDTH) +"|" ,DISPLAY_WIDTH) << endl;	
     cout << "\t+------------------------------------------------+" << endl;
 	cout << "\tInput: ";
 	string input;
@@ -319,10 +332,10 @@ void Gui::itemPage(Item item){
     clearMenu();
 	title = "Item nr." + to_string(item.getId()) + " - " + item.getName();
 	selectedItem = item;
-	addMenuItem(Item(item.getDescription(),"asd"));
-	addMenuItem(Item("Coins:\t" + to_string(item.getCoins()),"asd"));
-	addMenuItem(Item("Quantity:\t" + to_string(item.getQuantity()),"asd"));
-	addMenuItem(Item("Stock:\t" + to_string(item.getStockId()),"asd"));
+	addMenuItem(Item(item.getDescription(),TEXT_POPUP));
+	addMenuItem(Item("Coins:\t" + to_string(item.getCoins())));
+	addMenuItem(Item("Quantity:\t" + to_string(item.getQuantity())));
+	addMenuItem(Item("Stock:\t" + to_string(item.getStockId())));
 	addMenuItem(Item("Buy Item",BUY_ITEM_PAGE));
 }
 
@@ -332,9 +345,12 @@ void Gui::list(string list_type){
 }
 
 void Gui::list(){
+
+	footer="moose.env v.1";
 		
 	if(currMenu == ITEM_LIST){
 		title = "Items";
+		footer = "Use arrow keys to move cursor";
 
 
 		auto res = getJson("items/start_cat_id="+to_string(currCategoryId));
@@ -365,6 +381,7 @@ void Gui::list(){
 
 	else if(currMenu == CATEGORY_LIST){
 		title = "Categories";
+		footer = "Press TAB to select current category";
 		if(addItem) title += " - SELECT ITEM CATEGORY";
 
 	    clearMenu();
@@ -377,7 +394,7 @@ void Gui::list(){
 		title = "Select Object type";   
 
 	    clearMenu();
-		for (auto& item : getJson("objects/cat="+to_string(currCategoryId))) {
+		for (auto& item : getJson("objects/start_cat_id="+to_string(currCategoryId))) {
 			items.push_back(Item(item["name"],(int)item["id"],item["description"]));
 		}
 	}
@@ -405,8 +422,6 @@ void Gui::list(){
 		addMenuItem(Item("Credits:\t" + to_string(user.getBalance())));
 		addMenuItem(Item("Type:\t" + to_string(user.getType())));
 		addMenuItem(Item("Group:\t" + to_string(user.getGroupId())));
-	//User((int)uJ["id"], uJ["username"], uJ["email"], uJ["name"], uJ["surname"], (int)uJ["balance"], (int)uJ["type"], (int)uJ["group_id"], t);
-
 	}
 
 }
@@ -464,12 +479,20 @@ bool Gui::isNumber(string s) {
 
 string Gui::centerText(string t, int w) {
 	string o;
-	int l = w/2 - t.size()/2;
-	int r = w - l - t.size();
+	int l = (w - t.size())/2;
+	int r = w - t.size() - l;
+	//cout <<endl << to_string(w) +" - " + to_string(t.size()) + " - " + to_string(l) + " - " + to_string(r) <<endl;
 	for(; l>0; l--) o+=" ";
 	o+=t;
 	for(; r>0; r--) o+=" ";
 	return o;
+}
+
+string Gui::fillWithSpace(int cnt) {
+	string spstr ="";
+	for(int i=0; i<cnt; i++)
+		spstr+=" ";
+	return spstr;
 }
 
 void Gui::print() {
@@ -478,20 +501,35 @@ void Gui::print() {
 
     std::system("clear");	   
 	
-    cout << "+----------------------------------------------------------------+" << endl;
-	cout << "|"+centerText(currMenu + " - " + title + " - " + to_string(currCategoryId),64) + "|" << endl;
-    cout << "+----------------------------------------------------------------+" << endl;
+    //cout << "+----------------------------------------------------------------+" << endl;
+	cout << "\033[30;47m"+centerText(currMenu + " - " + title + " - " + to_string(currCategoryId),66) + "\033[0m" << endl;
+    //cout << "+----------------------------------------------------------------+ " << endl;
 
+	if(scrollPos > 0)
+		cout << centerText("^",66);
+	cout<<endl;
     for(int i=scrollPos; i<MENU_ITEMS + scrollPos; i++)
 	{
         if(i<items.size()){
 			if(i==selectedMenuItem)
-				cout << "\033[30;47m"+to_string(i) + ": " + items.at(i).getName() +"\033[0m" << endl;
+				cout << "\033[30;47m"+limitText(to_string(i) + ": " + items.at(i).getName()) +"\033[0m" << endl;
 			else
-				cout << to_string(i) + ": " + items.at(i).getName() << endl;
+				cout << limitText(to_string(i) + ": " + items.at(i).getName()) << endl;
+
 		}
 		else cout << endl;
 	}
-	cout << "-- Use arrow keys to move cursor -- TAB to select categories --" << endl;
+	if(scrollPos + MENU_ITEMS <= items.size()-1)
+		cout << centerText("v",66);
+
+	cout << endl << "\033[30;47m"+centerText("-- " +footer + " --",66)+"\033[0m" << endl;
 	
+}
+
+string Gui::limitText(string text) {
+	if(text.size() <= DISPLAY_WIDTH)
+		return text;
+	
+	return text.substr(0,DISPLAY_WIDTH-3)+"...";
+
 }
