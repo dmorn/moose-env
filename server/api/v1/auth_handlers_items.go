@@ -161,6 +161,8 @@ func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//test
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer jQbP-jSxKEEE4Tk4g53Mgwrp4nQ=" -X POST http://localhost:8080/purchase/3/5
 func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -184,7 +186,19 @@ func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 		if item, err := PurchaseItem(itemID, quantity, user); err != nil {
 			http.Error(w, err.Error(), 500)
 		} else {
-			json.NewEncoder(w).Encode(item)
+
+			//put right quantity (not the global one)
+			item.Quantity = quantity
+			//create receipt
+			if receipt, err := ReceiptForItem(item); err != nil {
+
+				errStr := fmt.Sprintf("%s. Please contact you stock taker. stock_id: %d item_id: %d, quantity_purchased: %d",
+					err.Error(), item.StockId, item.Id, quantity)
+
+				json.NewEncoder(w).Encode(errStr)
+			} else {
+				json.NewEncoder(w).Encode(receipt)
+			}
 		}
 	}
 }
