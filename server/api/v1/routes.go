@@ -52,6 +52,24 @@ var routes = Routes{
 		"/items",
 		ItemsHandler,
 	},
+	Route{
+		"Items",
+		"GET",
+		"/items/wishlist",
+		WishlistHandler,
+	},
+	Route{
+		"Items",
+		"GET",
+		"/items/pending",
+		PendingItemsHandler,
+	},
+	Route{
+		"Items",
+		"GET",
+		"/items/stock",
+		StockItemsHandler,
+	},
 
 	//specific routes
 	Route{

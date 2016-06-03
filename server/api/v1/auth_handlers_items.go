@@ -20,6 +20,33 @@ func ItemsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func WishlistHandler(w http.ResponseWriter, r *http.Request) {
+
+	if items, err := GetItemsWithStatus(3); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+}
+
+func StockItemsHandler(w http.ResponseWriter, r *http.Request) {
+
+	if items, err := GetItemsWithStatus(1); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+}
+
+func PendingItemsHandler(w http.ResponseWriter, r *http.Request) {
+
+	if items, err := GetItemsWithStatus(2); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+}
+
 //specific getters
 func ItemHandler(w http.ResponseWriter, r *http.Request) {
 

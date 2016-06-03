@@ -193,6 +193,29 @@ func GetItems() (*Items, error) {
 	return &items, nil
 }
 
+func GetItemsWithStatus(id int) (*Items, error) {
+
+	query := fmt.Sprintf("select * from item where status = %d", id)
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := Items{}
+	for rows.Next() {
+		item := Item{}
+
+		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.Link, &item.ObjectId, &item.StockId); err != nil {
+			return nil, err
+		}
+		item.Object, _ = GetObject(item.ObjectId)
+		item.Stock, _ = GetStock(item.StockId)
+		items = append(items, item)
+	}
+	return &items, nil
+}
+
 //specific getters
 
 func GetUser(id int) (*User, error) {
