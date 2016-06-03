@@ -5,6 +5,9 @@
 #include <cpr/cpr.h>
 #include <json.hpp>
 #include "item.h"
+#include <termios.h>
+#include <unistd.h>
+#include "user.h"
 //#include "category.h"
 //#include "menuItem.h"
 
@@ -12,15 +15,25 @@ using namespace std;
 using json = nlohmann::json;
 class Gui{
 	
-	#define MENU_ITEMS 10
+	#define MENU_ITEMS 15
+	#define DISPLAY_WIDTH 66
+	#define POPUP_WIDTH 48
+	
+
+
+	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
 	#define ITEM_PAGE "SIP"
 	#define ADD_ITEM_PAGE "AIP"
+	#define ADD_STOCK_PAGE "ASP"
 	#define OBJ_BY_CAT_LIST "OBC"
 	#define BUY_ITEM_PAGE "BIP"
+	#define PROFILE "PRO"
+	#define WISHLIST "PRO"
+	#define TEXT_POPUP "TPP"
 
 	public:
 		Gui();
@@ -42,16 +55,21 @@ class Gui{
 		string popupInput(string text);
 		void popupMessage(string text);
 		string centerText(string text, int width);
+		string fillWithSpace(int cnt);
+		string limitText(string text);
 		bool isNumber(string s);
-
-		string title;
+		json getJson(string content);
+		json postJson(string content, json data);
+		json postJsonNoToken(string content, json data);
+		string title, footer;
 		int selectedMenuItem, tmpSelectedMenuItem;
 		int scrollPos;
 		string currMenu;
 		int currCategoryId;
 		std::vector<Item> items;
 		Item selectedItem;
-		bool addItem;
+		bool addItem, addItemToStock;
+		User user;
 };
 
 #endif

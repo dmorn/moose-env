@@ -11,8 +11,7 @@ bool run=true;
 
 int main(int argc, char** argv) {
 
-	gui.mainMenu();
-	gui.print();
+	gui.update(0);
 	while(run)
 	{
 		int c = (int)getArrows();

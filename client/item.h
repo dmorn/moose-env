@@ -7,7 +7,7 @@
 //BASE: (vector<params>)
 //ITEM: (name, id, description) (coins, quantity, stock, obj_id)
 //CATEGORY: (name, id, description, parent_id)
-//MENU ITEM: (name, function)
+//MENU ITEM: (name, (function))
 //MENU ITEM: (name, <vector>params)
 
 using namespace std;
@@ -23,7 +23,9 @@ class Item{
 		Item(string name, int id, string description);
 		Item(string name, int id, string description, int coins, int quantity, int stock_id, int object_id);
 		Item(string name, int id, string description, int parent_id);
+		Item(string name);
 		Item(string name, string function);
+		Item(string name, string function, string param1);
 		Item(string name, vector<string> params);
 		int getId();
 		void setId(int id);
@@ -33,6 +35,7 @@ class Item{
 		int getParentId();
 		vector<string> getParams();
 
+		string getParamAt(int i);
 		int getCoins();
 		int getQuantity();
 		int getStockId();
