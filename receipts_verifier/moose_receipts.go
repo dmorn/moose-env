@@ -19,12 +19,12 @@ func main() {
 	pwd, err := os.Getwd()
 	check(err)
 
-	path_s_pu := fmt.Sprintf("%s/.moose_s_pu_key", pwd)
+	path_s_pu := fmt.Sprintf("%s/moose_s_pu_key", pwd)
 	serverPublicKeyMarshalled, err := ioutil.ReadFile(path_s_pu)
 	check(err)
 
 	//client
-	path_c_pr := fmt.Sprintf("%s/.moose_c_pr_key", pwd)
+	path_c_pr := fmt.Sprintf("%s/moose_c_pr_key", pwd)
 	clientPrivateKeyMarshalled, err := ioutil.ReadFile(path_c_pr)
 	check(err)
 
@@ -63,7 +63,11 @@ func main() {
 	err = json.Unmarshal(plainTextJsonData, &item)
 	check(err)
 
-	fmt.Printf("OAEP decrypted %s to \n%s\n", receipt.Data, item)
+	//fmt.Printf("OAEP decrypted %s to \n%s\n", receipt.Data, item)
+
+	fmt.
+		Printf("Receipt: \n\n \nItemID:\t\t\t%d \nName:\t\t\t%s \nCoins:\t\t\t%d \nQuantity:\t\t%d \nStockID:\t\t%d \nObjectID:\t\t%d\n\n",
+		item.ID, item.Name, item.Coins, item.Quantity, item.StockId, item.ObjectId)
 
 	//Verify Signature
 	//Message - Signature

@@ -214,8 +214,9 @@ func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 500)
 		} else {
 
-			//put right quantity (not the global one)
+			//put right quantity (not the global one) and the right coins
 			item.Quantity = quantity
+			item.Coins = item.Coins * quantity
 			//create receipt
 			if receipt, err := ReceiptForItem(item); err != nil {
 
