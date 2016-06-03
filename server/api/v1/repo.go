@@ -374,7 +374,7 @@ func GetItem(id int) (*Item, error) {
 	return &item, err
 }
 
-func PurchaseItem(id int, user *User) (*Item, error) {
+func PurchaseItem(id int, quantity int, user *User) (*Item, error) {
 
 	if item, err := GetItem(id); err != nil {
 		return nil, err
@@ -386,15 +386,33 @@ func PurchaseItem(id int, user *User) (*Item, error) {
 
 		}
 
-		//we have the item, now delete it
-		if err := DeleteItem(id); err != nil {
-			return nil, err
+		itemsAfterPossiblePurchase := item.Quantity - quantity
+
+		//check that the quantity required is not too much
+		if itemsAfterPossiblePurchase < 0 {
+			return nil, errors.New(fmt.Sprintf("We don't have enough items to satisfy your request: %d", item.Quantity))
+		}
+
+		if itemsAfterPossiblePurchase == 0 {
+			//we have the item, now delete it
+			if err := DeleteItem(id); err != nil {
+				return nil, err
+			}
+		} else {
+			//just update the quantity
+			if err := UpdateItemQuantity(id, itemsAfterPossiblePurchase); err != nil {
+				return nil, err
+			}
 		}
 
 		//withdraw money from user
 		if err := WithdrawAmountToUserBalance(user, item.Coins); err != nil {
-			//re insert the item
-			PostItem(item, item.Status)
+			//re insert the item or reupdate quantity
+			if itemsAfterPossiblePurchase == 0 {
+				PostItem(item, item.Status)
+			} else {
+				UpdateItemQuantity(id, item.Quantity)
+			}
 			return nil, err
 		}
 
@@ -407,6 +425,13 @@ func DeleteItem(id int) error {
 
 	query := fmt.
 		Sprintf("DELETE FROM item WHERE item_id=%d LIMIT 1", id)
+	_, err := db.Query(query)
+	return err
+}
+
+func UpdateItemQuantity(id int, newQuantity int) error {
+	query := fmt.
+		Sprintf("UPDATE `item` SET quantity=%d WHERE item_id=%d", newQuantity, id)
 	_, err := db.Query(query)
 	return err
 }

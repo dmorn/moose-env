@@ -98,12 +98,6 @@ var routes = Routes{
 		"/items/start_cat_id={category_id}",
 		ItemsWithCategoriesAndSubcategoriesHandler,
 	},
-	Route{
-		"Item",
-		"POST",
-		"/purchase/{item_id}",
-		PurchaseItemHandler,
-	},
 
 	Route{
 		"Stocks",
@@ -173,6 +167,12 @@ var routes = Routes{
 		PostObjectHandler,
 	},
 
+	Route{
+		"Item",
+		"POST",
+		"/purchase/{item_id}/{quantity}",
+		PurchaseItemHandler,
+	},
 	Route{
 		"Item",
 		"POST",
