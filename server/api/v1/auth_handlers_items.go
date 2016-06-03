@@ -165,6 +165,7 @@ func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	var itemID int
+	var quantity int
 	var err error
 
 	if itemID, err = strconv.Atoi(vars["item_id"]); err != nil {
@@ -172,10 +173,15 @@ func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if quantity, err = strconv.Atoi(vars["quantity"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
 	if user, err := GetUserFromToken(r); err != nil {
 		http.Error(w, err.Error(), 500)
 	} else {
-		if item, err := PurchaseItem(itemID, user); err != nil {
+		if item, err := PurchaseItem(itemID, quantity, user); err != nil {
 			http.Error(w, err.Error(), 500)
 		} else {
 			json.NewEncoder(w).Encode(item)

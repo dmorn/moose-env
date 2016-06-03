@@ -1,0 +1,207 @@
+* **Route**: `/objects`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/categories`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/groups`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/stocks`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/items`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/objects/id={object_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/user
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/objects/cat={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/objects/start_cat_id={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/items/id={item_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/items/cat={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/items/start_cat_id={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/stock/id={stock_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/categories/id={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/categories/start_id={category_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+  
+* **Route**: `/categories/parent_id={parent_id}`    
+  **Parameters**: `GET`   
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+   
+    
+    
+
+* **Route**: `/login`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+    
+  
+* **Route**: `/register`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/add_stock_taker/{username}/{stock_id}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/balance/{username}/withdraw={amount}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/balance/{username}/add={amount}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/object`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/item`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/purchase/{item_id}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/purchase_wishlist/{stock_id}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/into_stock/{stock_id}`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
+  
+* **Route**: `/category`       
+  **Parameters**: `POST`      
+  **Returns**:      
+  **Description**:        
+  **Example**:           
+       
