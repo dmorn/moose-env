@@ -33,10 +33,22 @@ Item::Item(string name, int id, string description, int parent_id){
 	item_type=CATEGORY_ITEM;
 }
 
+Item::Item(string name){
+	this->params.push_back(name);
+	this->params.push_back("nil");
+	item_type=MENU_ITEM;
+}
 
 Item::Item(string name, string function){
 	this->params.push_back(name);
 	this->params.push_back(function);
+	item_type=MENU_ITEM;
+}
+
+Item::Item(string name, string function, string param1){
+	this->params.push_back(name);
+	this->params.push_back(function);
+	this->params.push_back(param1);
 	item_type=MENU_ITEM;
 }
 
@@ -71,6 +83,12 @@ string Item::getFunction(){
 	else if(item_type==CATEGORY_ITEM)
 		return "SCL";
 	return params.at(1);
+}
+
+string Item::getParamAt(int i){
+	if(i>=0 && i<=params.size())
+		return params.at(i);
+	else return NULL;
 }
 
 string Item::getDescription(){

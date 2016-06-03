@@ -5,6 +5,9 @@
 #include <cpr/cpr.h>
 #include <json.hpp>
 #include "item.h"
+#include <termios.h>
+#include <unistd.h>
+#include "user.h"
 //#include "category.h"
 //#include "menuItem.h"
 
@@ -13,14 +16,18 @@ using json = nlohmann::json;
 class Gui{
 	
 	#define MENU_ITEMS 10
+	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
 	#define ITEM_PAGE "SIP"
 	#define ADD_ITEM_PAGE "AIP"
+	#define ADD_STOCK_PAGE "ASP"
 	#define OBJ_BY_CAT_LIST "OBC"
 	#define BUY_ITEM_PAGE "BIP"
+	#define PROFILE "PRO"
+	#define WISHLIST "PRO"
 
 	public:
 		Gui();
@@ -43,7 +50,9 @@ class Gui{
 		void popupMessage(string text);
 		string centerText(string text, int width);
 		bool isNumber(string s);
-
+		json getJson(string content);
+		json postJson(string content, json data);
+		json postJsonNoToken(string content, json data);
 		string title;
 		int selectedMenuItem, tmpSelectedMenuItem;
 		int scrollPos;
@@ -51,7 +60,8 @@ class Gui{
 		int currCategoryId;
 		std::vector<Item> items;
 		Item selectedItem;
-		bool addItem;
+		bool addItem, addItemToStock;
+		User user;
 };
 
 #endif
