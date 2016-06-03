@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -296,7 +295,7 @@ func PostObjectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //tests
-//curl -H "Content-Type: application/json" -H "Authorization: Bearer Zz_vA49aKmcW_XdoM8A69FKAKS0=" -X POST -d '{"parent_id":{"Int64":1, "Valid":true}, "name": "testcateogyr", "description": "aksjjdas"}' http://localhost:8080/category
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer Zz_vA49aKmcW_XdoM8A69FKAKS0=" -X POST -d '{"parent_id":1, "name": "testcateogyr", "description": "aksjjdas"}' http://localhost:8080/category
 func PostCategoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -305,12 +304,6 @@ func PostCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Error Decoding Form")
 		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	//check that the parent category is correct
-	if !isParentCategoryValid(category) && category.ParentId.Valid {
-		http.Error(w, errors.New("Invalid Parent Id").Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -389,7 +382,7 @@ func isParentCategoryValid(category *Category) bool {
 	categories, _ := GetCategoriesIDs()
 
 	for _, val := range categories {
-		if val.Int64 == id.Int64 {
+		if val == id {
 			return true
 		}
 	}

@@ -1,7 +1,5 @@
 package main
 
-import "database/sql"
-
 //BaseInfo that most models implement
 type BaseInfo struct {
 	Id          int    `json:"id"`
@@ -10,16 +8,15 @@ type BaseInfo struct {
 }
 
 type User struct {
-	Id         int            `json:"id"`
-	Username   string         `json:"username"`
-	Password   string         `json:"password"`
-	Email      string         `json:"email"`
-	Name       string         `json:"name"`
-	Surname    string         `json:"surname"`
-	Balance    int            `json:"balance"`
-	Type       int            `json:"type"`
-	VerifyCode sql.NullString `json:"verify_code"`
-	GroupId    int            `json:"group_id"`
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	Balance  int    `json:"balance"`
+	Type     int    `json:"type"`
+	GroupId  int    `json:"group_id"`
 }
 
 type Users []User
@@ -68,18 +65,19 @@ type Objects []Object
 
 type Category struct {
 	BaseInfo
-	ParentId sql.NullInt64 `json:"parent_id"`
+	ParentId int `json:"parent_id"`
 }
 
 type Categories []Category
 
 type Item struct {
-	Id       int `json:"id"`
-	Status   int `json:"status"`
-	ObjectId int `json:"object_id"`
-	Coins    int `json:"coins"`
-	Quantity int `json:"quantity"`
-	StockId  int `json:"stock_id"`
+	Id       int    `json:"id"`
+	Status   int    `json:"status"`
+	ObjectId int    `json:"object_id"`
+	Link     string `json:"link"`
+	Coins    int    `json:"coins"`
+	Quantity int    `json:"quantity"`
+	StockId  int    `json:"stock_id"`
 	*Stock   `json:"stock"`
 	*Object  `json:"object"`
 }

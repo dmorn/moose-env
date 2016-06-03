@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 03. Mai 2016 um 14:30
+-- Erstellungszeit: 03. Jun 2016 um 10:23
 -- Server-Version: 5.6.24
 -- PHP-Version: 5.6.8
 
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Datenbank: `makershare`
+-- Datenbank: `moosedb`
 --
 
 DELIMITER $$
@@ -35,7 +35,7 @@ BEGIN
 
 
 	
-	WHILE icategory_id IS NOT NULL DO
+	WHILE icategory_id >= 0
 		SELECT parent_id INTO found_parent
 		FROM category WHERE
 		category_id=icategory_id;
@@ -60,10 +60,23 @@ DELIMITER ;
 
 CREATE TABLE IF NOT EXISTS `category` (
   `category_id` int(11) NOT NULL,
-  `parent_id` int(11) DEFAULT NULL,
+  `parent_id` int(11) NOT NULL,
   `name` varchar(40) NOT NULL,
   `description` text NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `category`
+--
+
+INSERT INTO `category` (`category_id`, `parent_id`, `name`, `description`) VALUES
+(1, 0, 'Transistor', 'Hi'),
+(2, 1, 'n-Channel', 'Bye'),
+(3, 1, 'p-Channel', 'sweg'),
+(4, 2, 'nnnn', 'aaaa'),
+(5, 0, 'Switch', ''),
+(6, 5, 'Push Button', 'push me'),
+(7, 5, 'Toggle Switch', 'asdasd');
 
 -- --------------------------------------------------------
 
@@ -72,10 +85,18 @@ CREATE TABLE IF NOT EXISTS `category` (
 --
 
 CREATE TABLE IF NOT EXISTS `group` (
-  `group_id` char(10) NOT NULL,
+  `group_id` int(10) NOT NULL,
   `name` varchar(40) NOT NULL,
   `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `group`
+--
+
+INSERT INTO `group` (`group_id`, `name`, `description`) VALUES
+(1, 'First group', 'This is le first group'),
+(2, 'Second group', 'this is le second group');
 
 -- --------------------------------------------------------
 
@@ -90,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `group_items` (
 ,`coins` int(11)
 ,`quantity` int(11)
 ,`stock_name` varchar(100)
-,`group_id` char(10)
+,`group_id` int(10)
 ,`stock_id` int(11)
 );
 
@@ -114,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `group_stocks` (
 `stock_id` int(11)
 ,`name` varchar(100)
 ,`location` varchar(100)
-,`group_id` char(10)
+,`group_id` int(10)
 ,`user_id` int(11)
 );
 
@@ -129,9 +150,31 @@ CREATE TABLE IF NOT EXISTS `item` (
   `coins` int(11) NOT NULL,
   `status` int(11) NOT NULL DEFAULT '1',
   `quantity` int(11) NOT NULL,
+  `link` text NOT NULL,
   `object_id` int(11) NOT NULL,
   `stock_id` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `item`
+--
+
+INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `link`, `object_id`, `stock_id`) VALUES
+(1, 5, 1, 0, '', 1, 1),
+(2, 7, 1, 3, '', 2, 1),
+(3, 4, 1, 20, '', 2, 2),
+(4, 10, 1, 123, '', 2, 3),
+(5, 15, 1, 5, '', 3, 1),
+(6, 1, 1, 4, '', 1, 1),
+(7, 7, 1, 2, '', 4, 2),
+(8, 35, 1, 123, '', 3, 1),
+(9, 3, 1, 4, '', 1, 1),
+(10, 3, 1, 11, '', 1, 1),
+(11, 3, 1, 4, '', 4, 2),
+(12, 1, 1, 1, '', 1, 1),
+(13, 5, 1, 3, '', 2, 1),
+(14, 4, 1, 3, '', 1, 1),
+(15, 7, 1, 3, '', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -146,6 +189,16 @@ CREATE TABLE IF NOT EXISTS `object` (
   `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 
+--
+-- Daten für Tabelle `object`
+--
+
+INSERT INTO `object` (`object_id`, `name`, `description`, `category_id`) VALUES
+(1, '2n2222a', 'Transistor Central Semiconductor corp. 2N2222A NPN Gehäuseart TO-18 I(C) 800 mA Emitter-Sperrspannung U(CEO) 40 V', 2),
+(2, 'BC547', 'lol', 2),
+(3, '2n3906', 'Pnp transistor', 3),
+(4, 'tact switch', 'push meee', 6);
+
 -- --------------------------------------------------------
 
 --
@@ -157,6 +210,15 @@ CREATE TABLE IF NOT EXISTS `stock` (
   `name` varchar(100) NOT NULL,
   `location` varchar(100) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `stock`
+--
+
+INSERT INTO `stock` (`stock_id`, `name`, `location`) VALUES
+(1, 'Matthias''s warehouse', '46.779620, 11.689619'),
+(2, 'Gardena Stock 1', 'yolo'),
+(3, 'Unnamed stock', 'Unknown location');
 
 -- --------------------------------------------------------
 
@@ -173,10 +235,16 @@ CREATE TABLE IF NOT EXISTS `user` (
   `surname` varchar(100) NOT NULL,
   `balance` int(11) NOT NULL,
   `type` int(11) NOT NULL DEFAULT '2',
-  `verify_code` varchar(100) DEFAULT NULL,
-  `salt` binary(16) NOT NULL,
-  `group_id` char(10) DEFAULT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+  `group_id` int(10) DEFAULT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `user`
+--
+
+INSERT INTO `user` (`user_id`, `username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES
+(1, 'matthias', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'matpuz81@libero.it', 'Matthias', 'Moroder', 0, 1, 1),
+(2, 'daniel', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'danielmorandini@me.com', 'Daniel', 'Morandini', 0, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -188,6 +256,15 @@ CREATE TABLE IF NOT EXISTS `user_stock` (
   `user_id` int(11) NOT NULL,
   `stock_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Daten für Tabelle `user_stock`
+--
+
+INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES
+(1, 1),
+(1, 2),
+(2, 3);
 
 -- --------------------------------------------------------
 
@@ -261,27 +338,27 @@ ALTER TABLE `user_stock`
 -- AUTO_INCREMENT für Tabelle `category`
 --
 ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
 --
 -- AUTO_INCREMENT für Tabelle `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT für Tabelle `object`
 --
 ALTER TABLE `object`
-  MODIFY `object_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `object_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT für Tabelle `stock`
 --
 ALTER TABLE `stock`
-  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT für Tabelle `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

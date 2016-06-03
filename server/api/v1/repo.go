@@ -79,7 +79,7 @@ func GetUsers() (*Users, error) {
 		user := User{}
 
 		if err := rows.Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-			&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId); err != nil {
+			&user.Surname, &user.Balance, &user.Type, &user.GroupId); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
@@ -108,7 +108,7 @@ func GetCategories() (*Categories, error) {
 	return &cats, nil
 }
 
-func GetCategoriesIDs() ([]sql.NullInt64, error) {
+func GetCategoriesIDs() ([]int, error) {
 
 	const query = `select category_id from category;`
 	rows, err := db.Query(query)
@@ -117,9 +117,9 @@ func GetCategoriesIDs() ([]sql.NullInt64, error) {
 		return nil, err
 	}
 
-	cats := make([]sql.NullInt64, 0)
+	cats := make([]int, 0)
 	for rows.Next() {
-		var id sql.NullInt64
+		var id int
 		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
@@ -183,7 +183,7 @@ func GetItems() (*Items, error) {
 	for rows.Next() {
 		item := Item{}
 
-		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId); err != nil {
+		if err := rows.Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.Link, &item.ObjectId, &item.StockId); err != nil {
 			return nil, err
 		}
 		item.Object, _ = GetObject(item.ObjectId)
@@ -201,7 +201,7 @@ func GetUser(id int) (*User, error) {
 
 	user := User{}
 	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
+		&user.Surname, &user.Balance, &user.Type, &user.GroupId)
 
 	return &user, err
 }
@@ -212,7 +212,7 @@ func GetUserByUsername(u string) (*User, error) {
 
 	user := User{}
 	err := db.QueryRow(query).Scan(&user.Id, &user.Username, &user.Password, &user.Email, &user.Name,
-		&user.Surname, &user.Balance, &user.Type, &user.VerifyCode, &user.GroupId)
+		&user.Surname, &user.Balance, &user.Type, &user.GroupId)
 
 	return &user, err
 }
@@ -279,11 +279,6 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 //GetItemsWithCategoriesAndSubcategories gets every item with the requested category_id and every item each subcategory recursevly
 func GetObjectsWithCategoriesAndSubcategories(id int) (*Objects, error) {
 
-	//means that the category is a super category.
-	if id == 0 {
-		return GetObjects()
-	}
-
 	query := fmt.Sprintf("select * from object where isSubCategoryOf(category_id, %d) = 1", id)
 
 	rows, err := db.Query(query)
@@ -341,13 +336,7 @@ func GetCategoriesWithSubcategories(id int) (*Categories, error) {
 
 func GetCategoriesWithParent(id int) (*Categories, error) {
 
-	var query string
-	if id == 0 {
-		query = "select * from category where parent_id IS NULL"
-	} else {
-		query = fmt.Sprintf("select * from category where parent_id = %d", id)
-	}
-
+	query := fmt.Sprintf("select * from category where parent_id = %d", id)
 	categories := Categories{}
 
 	rows, err := db.Query(query)
@@ -369,12 +358,12 @@ func GetCategoriesWithParent(id int) (*Categories, error) {
 
 func GetItem(id int) (*Item, error) {
 
-	query := fmt.Sprintf("select item_id, coins, status, quantity, object_id, stock_id from item where item_id = %d", id)
+	query := fmt.Sprintf("select * from item where item_id = %d", id)
 
 	item := Item{}
 
 	err := db.QueryRow(query).
-		Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.ObjectId, &item.StockId)
+		Scan(&item.Id, &item.Coins, &item.Status, &item.Quantity, &item.Link, &item.ObjectId, &item.StockId)
 
 	if err != nil {
 		return nil, err
@@ -489,11 +478,17 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 
 func AddUserToStockTakers(user *User, id int) error {
 
+	//update type into db
 	query := fmt.
+		Sprintf("UPDATE `user` SET type=2 WHERE user_id=%d", user.Id)
+
+	_, err := db.Query(query)
+
+	query = fmt.
 		Sprintf("INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES (%d, %d)",
 		user.Id, id)
 
-	_, err := db.Query(query)
+	_, err = db.Query(query)
 	return err
 }
 
@@ -502,6 +497,8 @@ func PostUser(user *User) error {
 	hasher := sha256.New()
 	hasher.Write([]byte(user.Password))
 	hash := hex.EncodeToString(hasher.Sum(nil))
+
+	user.Type = 1 //is a normal user
 
 	query := fmt.
 		Sprintf("INSERT INTO `user` (`username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES ('%s', '%s', '%s', '%s', '%s', 0, 1, %d)",
@@ -526,8 +523,8 @@ func PostObject(object *Object) error {
 func PostItem(item *Item, status int) error {
 
 	query := fmt.
-		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,%d,%d);",
-		item.Id, item.Coins, item.Status, item.Quantity, item.ObjectId, item.StockId)
+		Sprintf("INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`,`link`, `object_id`, `stock_id`) VALUES (%d,%d,%d,%d,'%s',%d,%d);",
+		item.Id, item.Coins, item.Status, item.Quantity, item.Link, item.ObjectId, item.StockId)
 
 	_, err := db.Query(query)
 	return err
@@ -537,15 +534,9 @@ func PostCategory(category *Category) error {
 
 	var query string
 
-	if category.ParentId.Valid {
-		query = fmt.
-			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES ('%d', '%s', '%s');",
-			category.ParentId.Int64, category.Name, category.Description)
-	} else {
-		query = fmt.
-			Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES (NULL, '%s', '%s');",
-			category.Name, category.Description)
-	}
+	query = fmt.
+		Sprintf("INSERT INTO `category` (`parent_id`, `name`, `description`) VALUES (%d, '%s', '%s');",
+		category.ParentId, category.Name, category.Description)
 
 	fmt.Println(query)
 	_, err := db.Query(query)
