@@ -216,6 +216,56 @@ func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PutNewItemIntoStockHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var username string
+	var err error
+	var ok bool
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var item *Item
+	err = decoder.Decode(&item)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//first check that the user is a stock_taker
+	if _, list, err := IsUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	} else {
+		//it's a stock taker, check that he owns the stock
+		flag := intInSlice(item.StockId, list)
+		if flag {
+
+			if err = PostItem(item, 1); err != nil {
+				http.Error(w, err.Error(), 500)
+			} else {
+				if user, err := GetUserByUsername(username); err != nil {
+					http.Error(w, err.Error(), 500)
+				} else {
+					if err = AddAmountToUserBalance(user, item.Coins*item.Quantity); err != nil {
+						http.Error(w, err.Error(), 500)
+					} else {
+						json.NewEncoder(w).Encode(user)
+					}
+				}
+			}
+
+		} else {
+			http.Error(w, errors.New("This stock is not yours bro").Error(), http.StatusUnauthorized)
+		}
+	}
+
+}
+
 //test
 //curl -H "Content-Type: application/json" -H "Authorization: Bearer uIh381xmpmRb9sNW62IAyV1GGvU=" -X POST http://localhost:8080/purchase/3/5
 func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
