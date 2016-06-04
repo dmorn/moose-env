@@ -69,7 +69,10 @@ void Gui::update(int keycode) {
 					tmpSelectedMenuItem = -1;
 				}
 				clearMenu();
-				list(ITEM_LIST);
+				if(currentItem->getStatus() == 3)
+					list(WISH_LIST);
+				else
+					list(ITEM_LIST);
 			}
 			else if(currMenu == CATEGORY_LIST && currCategoryId != 0)
 			{
@@ -96,13 +99,13 @@ void Gui::update(int keycode) {
 		{
 			if(elements.at(selectedMenuItem)->getFunction() == TEXT_POPUP)	//temporary menu change, no need to change currMenu
 			{
-				popupMessage(elements.at(selectedMenuItem)->getName());
+				popupMessage(elements.at(selectedMenuItem)->getText());
 			}
 			else {
 
 			   	currMenu = elements.at(selectedMenuItem)->getFunction();
 
-				if(currMenu == ITEM_LIST || currMenu == STOCK_LIST || currMenu == PROFILE) 
+				if(currMenu == ITEM_LIST || currMenu == STOCK_LIST || currMenu == WISH_LIST || currMenu == PROFILE) 
 					list();	
 
 				else if(currMenu == CATEGORY_LIST) {
@@ -164,7 +167,7 @@ void Gui::update(int keycode) {
 					if(currMenu == ADD_STOCK_PAGE)
 						addItemToStock=true;
 				
-					list(CATEGORY_LIST);
+					list(STOCK_LIST);
 				}
 				else if(currMenu == BUY_ITEM_PAGE){
 					
@@ -172,8 +175,25 @@ void Gui::update(int keycode) {
 						popupMessage("No item selected.");
 					else {
 						int q = popupNumber("Quantity: ");
-						bool ok = popupYesNo("Order " + to_string(q) + "x " +currentItem->getName()+ " for " + 
+						bool ok = popupYesNo("Buy " + to_string(q) + "x " +currentItem->getName()+ " for " + 
 											to_string(currentItem->getCoins() * q) + " coins?");
+						if(ok){
+							popupMessage("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
+							postJson("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
+							popupMessage("Ok");
+
+							mainMenu();
+						}
+					}
+				}				
+				else if(currMenu == ORDER_ITEM_PAGE){
+					
+					if(currentItem==NULL)
+						popupMessage("No item selected.");
+					else {
+						bool ok = popupYesNo("Order " + to_string(currentItem->getQuantity()) + "x " +currentItem->getName()+ " for " + 
+											to_string(currentItem->getCoins() * currentItem->getQuantity()) + " coins?");
+						if(ok) mainMenu();
 					}
 				}
 				else if(currMenu == ADD_ITEM_SELECTED) {
@@ -188,7 +208,12 @@ void Gui::update(int keycode) {
 				else if(currMenu == ITEM_BY_STOCK) {
 					selectedStock = (Stock*) elements.at(selectedMenuItem);
 					elements.erase(elements.begin() + selectedMenuItem);
-					list(ITEM_LIST);
+					if(addItem){
+						list(CATEGORY_LIST);
+					}
+					else {
+						list(ITEM_LIST);
+					}
 				}
 			}
 		}
@@ -266,6 +291,7 @@ void Gui::mainMenu(){
 	title = "Welcome " + user.getName() + " to Moose env.";
 	footer="moose.env v.1";
    	elements.push_back(new MenuItem("Item List", ITEM_LIST));
+   	elements.push_back(new MenuItem("Wishlist", WISH_LIST));
    	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_PAGE));
    	elements.push_back(new MenuItem("Add item to wishlist",ADD_ITEM_PAGE));
    	elements.push_back(new MenuItem("Stock list",STOCK_LIST));
@@ -278,7 +304,7 @@ void Gui::addItemPage(int object_no) {
 	elements.erase(elements.begin() + object_no);
 	title = "Add Item";
     clearMenu();
-	elements.push_back(new MenuItem(obj->getName(),CATEGORY_LIST));
+	elements.push_back(new MenuItem(obj->getText(),CATEGORY_LIST));
 
     std::system("clear");	
     int quantity = popupNumber("Quantity:");
@@ -286,9 +312,11 @@ void Gui::addItemPage(int object_no) {
 	bool add = popupYesNo("Add: "+to_string(quantity) +"x " +obj->getName() + " for " + to_string(coins) + " coins? (y/n)");
 	
 	int stock_id=0;
-
+	if(selectedStock != NULL)
+		stock_id = selectedStock->getId();
+	int status = (addItemToStock)?1:3;
 	json newItemJson = {
-	  {"status", (addItemToStock)?1:3},
+	  {"status", status},
 	  {"coins", coins},
 	  {"quantity", quantity},
 	  {"stock_id", stock_id},
@@ -308,7 +336,7 @@ void Gui::addItemPage(int object_no) {
 }
 
 void Gui::itemPage(int item_no){
-	currentItem = (ItemItem*)elements.at(item_no);
+	currentItem = (Item*)elements.at(item_no);
 	elements.erase(elements.begin() + item_no);
     clearMenu();
 	title = "Item nr." + to_string(currentItem->getId()) + " - " + currentItem->getName();
@@ -316,8 +344,13 @@ void Gui::itemPage(int item_no){
 	elements.push_back(new MenuItem(currentItem->getDescription(),TEXT_POPUP));
 	elements.push_back(new MenuItem("Coins:\t" + to_string(currentItem->getCoins())));
 	elements.push_back(new MenuItem("Quantity:\t" + to_string(currentItem->getQuantity())));
-	elements.push_back(new MenuItem("Stock:\t" + to_string(currentItem->getStockId())));
-	elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE));
+	elements.push_back(new MenuItem("Stock:\t" + currentItem->getStock()));
+
+	switch(currentItem->getStatus()) {
+		case 1: elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE)); break;
+		case 2: elements.push_back(new MenuItem("Item ordered but not yet in stock.")); break;
+		case 3: elements.push_back(new MenuItem("Order and remove from wishlist",ORDER_ITEM_PAGE)); break;
+	}
 }
 
 void Gui::list(string list_type){
@@ -328,26 +361,49 @@ void Gui::list(string list_type){
 void Gui::list(){
 
 	footer="moose.env v.1";
+
+	if(currMenu == WISH_LIST){
+		title = "Wishlist";
+		footer = "Use arrow keys to move cursor";
+		auto res = getJson("items/wishlist");
+		clearMenu();
+		if(res.size() > 0)
+		{
+			for (auto& item : res) {
+				json object = item["object"];
+				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],item["stock"]["name"],(int)item["object_id"],(int)item["status"]);
+				elements.push_back(it);
+			}
+			
+			title = to_string(elements.size()) + " Items found in wishlist";
+		}
+		else {
+			getchar();
+			popupMessage("No items in wishlist.");
+   			clearMenu();
+			mainMenu();
+		}
+	}
 		
 	if(currMenu == ITEM_LIST){
 		title = "Items";
 		footer = "Use arrow keys to move cursor";
 		string query = "items/start_cat_id="+to_string(currCategoryId);
-		//if(selectedStock != NULL)
-			//query +=
+		if(selectedStock != NULL)
+			query = "items/1/"+to_string(selectedStock->getId())+"/"+to_string(currCategoryId);
 		auto res = getJson(query);
 		clearMenu();
 		if(res.size() > 0)
 		{
 			for (auto& item : res) {
 				json object = item["object"];
-				ItemItem* it = new ItemItem(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],(int)item["stock_id"],(int)item["object_id"]);
+				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],item["stock"]["name"],(int)item["object_id"],(int)item["status"]);
 				elements.push_back(it);
 			}
 			
 			title = to_string(elements.size()) + " Items found";
 			if(selectedStock != NULL)
-				title += " @" + selectedStock->getName();
+				title += " @" + selectedStock->getText();
 		}
 		else if(currCategoryId != 0)
 		{	
@@ -488,6 +544,16 @@ json Gui::postJsonNoToken(string content, json data) {
 	return json::parse(r.text);
 }
 
+json Gui::postJson(string content) {
+
+	auto r = cpr::Post(cpr::Url{"http://localhost:8080/"+content},
+	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
+				{"Content-Type", "application/json"}});
+	popupMessage(r.text);
+	return json::parse(r.text);
+
+}
+
 json Gui::postJson(string content, json data) {
 
 	auto r = cpr::Post(cpr::Url{"http://localhost:8080/"+content},
@@ -515,7 +581,6 @@ string Gui::centerText(string t, int w) {
 	string o;
 	int l = (w - t.size())/2;
 	int r = w - t.size() - l;
-	//cout <<endl << to_string(w) +" - " + to_string(t.size()) + " - " + to_string(l) + " - " + to_string(r) <<endl;
 	for(; l>0; l--) o+=" ";
 	o+=t;
 	for(; r>0; r--) o+=" ";
@@ -546,10 +611,17 @@ void Gui::print() {
 	{
         if(i<elements.size()){
 			if(i==selectedMenuItem)
-				cout << "\033[30;47m"+limitText(to_string(i) + ": " + elements.at(i)->getName()) +"\033[0m" << endl;
+				cout << "\033[30;47m"+limitText(elements.at(i)->getText()) +"\033[0m" << endl;
 			else
-				cout << limitText(to_string(i) + ": " + elements.at(i)->getName()) << endl;
+				cout << limitText(elements.at(i)->getText()) << endl;
 
+/*
+
+			if(i==selectedMenuItem)
+				cout << "\033[30;47m"+limitText(to_string(i) + ": " + elements.at(i)->getText()) +"\033[0m" << endl;
+			else
+				cout << limitText(to_string(i) + ": " + elements.at(i)->getText()) << endl;
+*/
 		}
 		else cout << endl;
 	}

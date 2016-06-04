@@ -6,7 +6,7 @@ using namespace std;
 
 class Element{
 	public:
-		virtual const string& getName() const = 0;
+		virtual const string& getText() const = 0;
 		virtual const string& getFunction() const = 0;
 };
 
@@ -14,8 +14,9 @@ class Category : public Element {
 	public:
 		Category (string name, int id, string description, int parent_id);
 
-		virtual const string& getName() const;
+		virtual const string& getText() const;
 		virtual const string& getFunction() const;
+		const string& getName() const;
 		const string& getDescription() const;
 		const int getId() const;
 		const int getParentId() const;
@@ -27,34 +28,37 @@ class Category : public Element {
 
 class MenuItem : public Element {
 	public:
-		MenuItem (string name);
-		MenuItem (string name, string function);
+		MenuItem (string text);
+		MenuItem (string text, string function);
 
-		virtual const string& getName() const;
+		virtual const string& getText() const;
 		virtual const string& getFunction() const;
 		//const string& getParam() const;
 
 	private:
-		string name, function;
+		string text, function;
 };
 
-class ItemItem : public Element {
+class Item : public Element {
 	public:
-		ItemItem();
-		ItemItem (string name, int id, string description, int coins, int quantity, int stock_id, int object_id);
+		Item();
+		Item (string name, int id, string description, int coins, int quantity, string stock, int object_id, int status);
+		Item (string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status);
 
-		virtual const string& getName() const;
+		virtual const string& getText() const;
 		virtual const string& getFunction() const;
+		const string& getName() const;
 		const string& getDescription() const;
+		const string& getStock() const;
 		const int getId() const;
 		const int getCoins() const;
 		const int getQuantity() const;
-		const int getStockId() const;
 		const int getObjectId() const;
+		const int getStatus() const;
 
 	private:
-		string name, function, description;
-		int id, coins, quantity, stock_id, object_id;
+		string text, name, function, description, stock;
+		int id, coins, quantity, object_id, status;
 };
 
 class Object : public Element {
@@ -62,8 +66,9 @@ class Object : public Element {
 		Object();
 		Object (string name, int id, string description);
 
-		virtual const string& getName() const;
+		virtual const string& getText() const;
 		virtual const string& getFunction() const;
+		const string& getName() const;
 		const string& getDescription() const;
 		const int getId() const;
 
@@ -77,8 +82,9 @@ class Stock : public Element {
 		Stock();
 		Stock (string name, int id, string location);
 
-		virtual const string& getName() const;
+		virtual const string& getText() const;
 		virtual const string& getFunction() const;
+		const string& getName() const;
 		const string& getLocation() const;
 		const int getId() const;
 

@@ -22,6 +22,7 @@ class Gui{
 	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
+	#define WISH_LIST "SWL"
 	#define ITEM_BY_STOCK "IBS"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
@@ -31,6 +32,7 @@ class Gui{
 	#define ADD_STOCK_PAGE "ASP"
 	#define OBJ_BY_CAT_LIST "OBC"
 	#define BUY_ITEM_PAGE "BIP"
+	#define ORDER_ITEM_PAGE "OIP"
 	#define PROFILE "PRO"
 	#define WISHLIST "PRO"
 	#define TEXT_POPUP "TPP"
@@ -59,6 +61,7 @@ class Gui{
 		string limitText(string text);
 		bool isNumber(string s);
 		json getJson(string content);
+		json postJson(string content);
 		json postJson(string content, json data);
 		json postJsonNoToken(string content, json data);
 		string title, footer;
@@ -67,7 +70,7 @@ class Gui{
 		string currMenu;
 		int currCategoryId;
 		std::vector<Element*> elements;
-		ItemItem* currentItem;
+		Item* currentItem;
 		bool addItem, addItemToStock;
 		Stock * selectedStock;
 		User user;

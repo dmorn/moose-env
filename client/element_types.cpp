@@ -12,6 +12,9 @@ Category::Category (string name, int id, string description, int parent_id) :
 const string& Category::getName() const {
 	return name;
 }
+const string& Category::getText() const {
+	return name;
+}
 
 const string& Category::getFunction() const {
 	return function;
@@ -30,64 +33,93 @@ const int Category::getParentId() const{
 }
 
 // MENU_ITEM
-MenuItem::MenuItem (string name) :
-	name(name),
+MenuItem::MenuItem (string text) :
+	text(text),
 	function("NIL")
 { }
-MenuItem::MenuItem (string name, string function) :
-	name(name),
+MenuItem::MenuItem (string text, string function) :
+	text(text),
 	function(function)
 { }
 
 
-const string& MenuItem::getName() const {
-	return name;
+const string& MenuItem::getText() const {
+	return text;
 }
 
 const string& MenuItem::getFunction() const {
 	return function;
 }
 
-// ITEM_ITEM
+// ITEM
 
-ItemItem::ItemItem() { };
+Item::Item() { };
 
-ItemItem::ItemItem(string name, int id, string description, int coins, int quantity, int stock_id, int object_id) :
+Item::Item(string name, int id, string description, int coins, int quantity, string stock, int object_id, int status) :
 	name(name),
 	id(id),
 	description(description),
 	coins(coins),
 	quantity(quantity),
-	stock_id(stock_id),
+	stock(stock),
 	object_id(object_id),
+	status(status),
+	function("SIP")
+{
+	text = to_string(id) + ": " + name + "\t" + to_string(coins) + " coins; " + to_string(quantity) + "x in ";
+	switch(status){
+		case 1: text += "stock"; break;
+		case 2: text += "pending list"; break;
+		case 3: text += "wishlist"; break;
+	}
+	text+= " @"+stock;
+
+}
+
+Item::Item(string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status) :
+	text(text),
+	name(name),
+	id(id),
+	description(description),
+	coins(coins),
+	quantity(quantity),
+	stock(stock),
+	object_id(object_id),
+	status(status),
 	function("SIP")
 { }
 
-const string& ItemItem::getName() const {
+const string& Item::getText() const {
+	return text;
+}
+const string& Item::getName() const {
 	return name;
 }
-const string& ItemItem::getFunction() const {
+const string& Item::getFunction() const {
 	return function;
 }
-const string& ItemItem::getDescription() const{
+const string& Item::getDescription() const{
 	return description;
 }
 
-const int ItemItem::getId() const{
+const int Item::getId() const{
 	return id;
 }
 
-const int ItemItem::getCoins() const{
+const int Item::getCoins() const{
 	return coins;
 }
-const int ItemItem::getQuantity() const{
+const int Item::getQuantity() const{
 	return quantity;
 }
-const int ItemItem::getStockId() const{
-	return stock_id;
+const string& Item::getStock() const{
+	return stock;
 }
-const int ItemItem::getObjectId() const{
+const int Item::getObjectId() const{
 	return object_id;
+}
+const int Item::getStatus() const{
+	return status;
 }
 
 // OBJECT
@@ -100,7 +132,9 @@ Object::Object(string name, int id, string description) :
 	description(description),
 	function("AIS")
 { }
-
+const string& Object::getText() const {
+	return name;
+}
 const string& Object::getName() const {
 	return name;
 }
@@ -126,7 +160,9 @@ Stock::Stock(string name, int id, string location) :
 	location(location),
 	function("IBS")
 { }
-
+const string& Stock::getText() const {
+	return name;
+}
 const string& Stock::getName() const {
 	return name;
 }
