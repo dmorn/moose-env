@@ -73,17 +73,3 @@ func ReceiptForItem(item *Item) (*Receipt, error) {
 	//fmt.Printf("PSS Signature : %x\n", signature)
 	return &Receipt{hex.EncodeToString(ciphertext), hex.EncodeToString(signature)}, nil
 }
-
-type Receipt struct {
-	Data      string `json:"data"`
-	Signature string `json:"signature"`
-}
-
-type ItemShorter struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Coins    int    `json:"coins_payed"`
-	Quantity int    `json:"quantity"`
-	StockId  int    `json:"stock_id"`
-	ObjectId int    `json:"object_id"`
-}

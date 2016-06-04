@@ -72,6 +72,13 @@ var routes = Routes{
 		StockItemsHandler,
 	},
 
+	Route{
+		"Test",
+		"GET",
+		"/test",
+		TestHandler,
+	},
+
 	//specific routes
 	Route{
 		"Object",

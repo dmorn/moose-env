@@ -83,3 +83,19 @@ type Item struct {
 }
 
 type Items []Item
+
+//receipt stuff
+
+type Receipt struct {
+	Data      string `json:"data"`
+	Signature string `json:"signature"`
+}
+
+type ItemShorter struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Coins    int    `json:"coins_payed"`
+	Quantity int    `json:"quantity"`
+	StockId  int    `json:"stock_id"`
+	ObjectId int    `json:"object_id"`
+}
