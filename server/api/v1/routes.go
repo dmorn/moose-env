@@ -220,7 +220,7 @@ var routes = Routes{
 	Route{
 		"Item",
 		"POST",
-		"/put_into_stock/{username}",
+		"/new_item_into_stock/{username}",
 		PutNewItemIntoStockHandler,
 	},
 
