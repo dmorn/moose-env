@@ -248,7 +248,7 @@ func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//curl -H "Content-Type: application/json" -H "Authorization: Bearer dRBCRdLaRnNGTZGBxhVjYY8f9PM=" -X POST http://localhost:8080/balance/daniel/add=12
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer jMHp9uyQY2w1lUCdq-2RLZf4Wd0=" -X POST http://localhost:8080/balance/matthias/add=120
 func UserAddBalance(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var username string

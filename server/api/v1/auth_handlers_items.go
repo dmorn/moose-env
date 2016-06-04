@@ -217,7 +217,7 @@ func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //test
-//curl -H "Content-Type: application/json" -H "Authorization: Bearer jQbP-jSxKEEE4Tk4g53Mgwrp4nQ=" -X POST http://localhost:8080/purchase/3/5
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer uIh381xmpmRb9sNW62IAyV1GGvU=" -X POST http://localhost:8080/purchase/3/5
 func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
