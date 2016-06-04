@@ -105,6 +105,34 @@ func ItemsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.R
 	}
 }
 
+func ItemsHandlerStatusStockCat(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var startCatID int
+	var stockID int
+	var status int
+	var err error
+
+	if startCatID, err = strconv.Atoi(vars["start_cat_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if stockID, err = strconv.Atoi(vars["stock_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if status, err = strconv.Atoi(vars["status"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if items, err := GetItemsWithStatusStockCategory(status, stockID, startCatID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+
+}
+
 //post items
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -188,8 +216,58 @@ func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PutNewItemIntoStockHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var username string
+	var err error
+	var ok bool
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var item *Item
+	err = decoder.Decode(&item)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	//first check that the user is a stock_taker
+	if _, list, err := IsUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	} else {
+		//it's a stock taker, check that he owns the stock
+		flag := intInSlice(item.StockId, list)
+		if flag {
+
+			if err = PostItem(item, 1); err != nil {
+				http.Error(w, err.Error(), 500)
+			} else {
+				if user, err := GetUserByUsername(username); err != nil {
+					http.Error(w, err.Error(), 500)
+				} else {
+					if err = AddAmountToUserBalance(user, item.Coins*item.Quantity); err != nil {
+						http.Error(w, err.Error(), 500)
+					} else {
+						json.NewEncoder(w).Encode(user)
+					}
+				}
+			}
+
+		} else {
+			http.Error(w, errors.New("This stock is not yours bro").Error(), http.StatusUnauthorized)
+		}
+	}
+
+}
+
 //test
-//curl -H "Content-Type: application/json" -H "Authorization: Bearer jQbP-jSxKEEE4Tk4g53Mgwrp4nQ=" -X POST http://localhost:8080/purchase/3/5
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer uIh381xmpmRb9sNW62IAyV1GGvU=" -X POST http://localhost:8080/purchase/3/5
 func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

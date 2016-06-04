@@ -22,13 +22,13 @@ func ReceiptForItem(item *Item) (*Receipt, error) {
 	}
 
 	//server
-	path_s_pr := fmt.Sprintf("%s/.moose_s_pr_key", pwd)
+	path_s_pr := fmt.Sprintf("%s/moose_s_pr_key", pwd)
 	serverPrivateKeyMarshalled, err := ioutil.ReadFile(path_s_pr)
 	if err != nil {
 		return nil, err
 	}
 
-	path_c_pu := fmt.Sprintf("%s/.moose_c_pu_key", pwd)
+	path_c_pu := fmt.Sprintf("%s/moose_c_pu_key", pwd)
 	clientPublicKeyMarshalled, err := ioutil.ReadFile(path_c_pu)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func ReceiptForItem(item *Item) (*Receipt, error) {
 	var clientPublickey *rsa.PublicKey = clientPublicKeyI.(*rsa.PublicKey)
 
 	//Encrypt  Message
-	data := ItemShorter{item.Id, item.Name, item.Coins, item.Quantity, item.StockId, item.ObjectId}
+	data := ItemShorter{item.Id, item.BaseInfo.Name, item.Coins, item.Quantity, item.StockId, item.ObjectId}
 
 	itemMarshalled, err := json.Marshal(data)
 	if err != nil {

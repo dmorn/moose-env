@@ -19,12 +19,7 @@ var routes = Routes{
 		"/objects",
 		ObjectsHandler,
 	},
-	//Route{
-	//	"Users",
-	//	"GET",
-	//	"/users",
-	//	UsersHandler,
-	//},
+
 	Route{
 		"Categories",
 		"GET",
@@ -46,6 +41,12 @@ var routes = Routes{
 		StocksHandler,
 	},
 
+	Route{
+		"Items",
+		"GET",
+		"/items/{status}/{stock_id}/{start_cat_id}",
+		ItemsHandlerStatusStockCat,
+	},
 	Route{
 		"Items",
 		"GET",
@@ -78,11 +79,18 @@ var routes = Routes{
 		"/objects/id={object_id}",
 		ObjectHandler,
 	},
+
 	Route{
 		"User",
 		"GET",
 		"/user",
 		UserHandler,
+	},
+	Route{
+		"Users",
+		"GET",
+		"/users/group_id={group_id}",
+		UsersHandler,
 	},
 
 	Route{
@@ -206,8 +214,14 @@ var routes = Routes{
 	Route{
 		"Item",
 		"POST",
-		"/into_stock/{stock_id}",
+		"/put_into_stock/{stock_id}",
 		PutPurchasesIntoStockHandler,
+	},
+	Route{
+		"Item",
+		"POST",
+		"/new_item_into_stock/{username}",
+		PutNewItemIntoStockHandler,
 	},
 
 	Route{
