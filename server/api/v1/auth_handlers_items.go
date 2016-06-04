@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -303,13 +307,30 @@ func PurchaseItemHandler(w http.ResponseWriter, r *http.Request) {
 
 				json.NewEncoder(w).Encode(errStr)
 			} else {
-				json.NewEncoder(w).Encode(receipt)
+				if image, err := QRImageFromReceipt(receipt); err != nil {
+					json.NewEncoder(w).Encode(receipt)
+				} else {
+					writeImage(w, &image)
+				}
 			}
 		}
 	}
 }
 
-//private helper
+//tests
+func TestHandler(w http.ResponseWriter, r *http.Request) {
+
+	item, _ := GetItem(1)
+	receipt, _ := ReceiptForItem(item)
+	if image, err := QRImageFromReceipt(receipt); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		writeImage(w, &image)
+	}
+
+}
+
+//private helpers
 func intInSlice(a int, list []int) bool {
 	for _, b := range list {
 		if b == a {
@@ -317,4 +338,18 @@ func intInSlice(a int, list []int) bool {
 		}
 	}
 	return false
+}
+
+func writeImage(w http.ResponseWriter, img *image.Image) {
+
+	buffer := new(bytes.Buffer)
+	if err := jpeg.Encode(buffer, *img, nil); err != nil {
+		log.Println("unable to encode image.")
+	}
+
+	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Length", strconv.Itoa(len(buffer.Bytes())))
+	if _, err := w.Write(buffer.Bytes()); err != nil {
+		log.Println("unable to write image.")
+	}
 }

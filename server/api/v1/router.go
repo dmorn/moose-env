@@ -28,7 +28,7 @@ func NewRouter() *mux.Router {
 
 		handler = route.HandlerFunc
 
-		if route.Name == "Login" || route.Name == "Register" {
+		if route.Name == "Login" || route.Name == "Register" || route.Name == "Test" {
 			handler = MMiddleware(handler, route.Name)
 		} else {
 			handler = MAuthMiddleware(handler, route.Name)
