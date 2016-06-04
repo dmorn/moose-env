@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 03. Jun 2016 um 10:23
+-- Erstellungszeit: 04. Jun 2016 um 11:45
 -- Server-Version: 5.6.24
 -- PHP-Version: 5.6.8
 
@@ -24,7 +24,7 @@ DELIMITER $$
 --
 -- Funktionen
 --
-CREATE DEFINER=`root`@`localhost` FUNCTION `isSubcategoryOf`(icategory_id INT,iparent_id INT) RETURNS int(11)
+CREATE DEFINER=`root`@`localhost` FUNCTION `isSubcategoryOf`(`icategory_id` INT, `iparent_id` INT) RETURNS int(11)
 BEGIN
 	
 	DECLARE found_parent INT DEFAULT 0;
@@ -35,7 +35,7 @@ BEGIN
 
 
 	
-	WHILE icategory_id >= 0
+	WHILE icategory_id > 0 DO
 		SELECT parent_id INTO found_parent
 		FROM category WHERE
 		category_id=icategory_id;
@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS `group_items` (
 ,`description` text
 ,`category_id` int(11)
 ,`coins` int(11)
+,`status` int(11)
 ,`quantity` int(11)
 ,`stock_name` varchar(100)
 ,`group_id` int(10)
@@ -273,7 +274,7 @@ INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES
 --
 DROP TABLE IF EXISTS `group_items`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `group_items` AS select `item`.`item_id` AS `item_id`,`object`.`name` AS `name`,`object`.`description` AS `description`,`object`.`category_id` AS `category_id`,`item`.`coins` AS `coins`,`item`.`quantity` AS `quantity`,`stock`.`name` AS `stock_name`,`user`.`group_id` AS `group_id`,`stock`.`stock_id` AS `stock_id` from ((((`item` join `object` on((`item`.`object_id` = `object`.`object_id`))) join `stock` on((`item`.`stock_id` = `stock`.`stock_id`))) join `user_stock` on((`item`.`stock_id` = `user_stock`.`stock_id`))) join `user` on((`user_stock`.`user_id` = `user`.`user_id`)));
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `group_items` AS select `item`.`item_id` AS `item_id`,`object`.`name` AS `name`,`object`.`description` AS `description`,`object`.`category_id` AS `category_id`,`item`.`coins` AS `coins`,`item`.`status` AS `status`,`item`.`quantity` AS `quantity`,`stock`.`name` AS `stock_name`,`user`.`group_id` AS `group_id`,`stock`.`stock_id` AS `stock_id` from ((((`item` join `object` on((`item`.`object_id` = `object`.`object_id`))) join `stock` on((`item`.`stock_id` = `stock`.`stock_id`))) join `user_stock` on((`item`.`stock_id` = `user_stock`.`stock_id`))) join `user` on((`user_stock`.`user_id` = `user`.`user_id`)));
 
 -- --------------------------------------------------------
 

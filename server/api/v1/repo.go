@@ -496,11 +496,6 @@ func GetItemByCategory(categoryID int) (*Items, error) {
 //GetItemsWithCategoriesAndSubcategories gets every item with the requested category_id and every item each subcategory recursevly
 func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 
-	//means that the category is a super category.
-	if id == 0 {
-		return GetItems()
-	}
-
 	query := fmt.Sprintf("select item_id from group_items where isSubCategoryOf(category_id, %d) = 1", id)
 	items := Items{}
 
@@ -522,8 +517,32 @@ func GetItemsWithCategoriesAndSubcategories(id int) (*Items, error) {
 	return &items, err
 }
 
-//POST
+func GetItemsWithStatusStockCategory(status int, stock_id int, start_cat_id int) (*Items, error) {
 
+	query := fmt.
+		Sprintf("select item_id from group_items where isSubCategoryOf(category_id, %d) = 1 AND status=%d AND stock_id=%d",
+		start_cat_id, status, stock_id)
+	items := Items{}
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		//take every id
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		item, _ := GetItem(id)
+		items = append(items, *item)
+	}
+	return &items, err
+}
+
+//POST
 func AddUserToStockTakers(user *User, id int) error {
 
 	//update type into db

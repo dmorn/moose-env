@@ -44,6 +44,12 @@ var routes = Routes{
 	Route{
 		"Items",
 		"GET",
+		"/items/{status}/{stock_id}/{start_cat_id}",
+		ItemsHandlerStatusStockCat,
+	},
+	Route{
+		"Items",
+		"GET",
 		"/items",
 		ItemsHandler,
 	},

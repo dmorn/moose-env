@@ -105,6 +105,34 @@ func ItemsWithCategoriesAndSubcategoriesHandler(w http.ResponseWriter, r *http.R
 	}
 }
 
+func ItemsHandlerStatusStockCat(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var startCatID int
+	var stockID int
+	var status int
+	var err error
+
+	if startCatID, err = strconv.Atoi(vars["start_cat_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if stockID, err = strconv.Atoi(vars["stock_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if status, err = strconv.Atoi(vars["status"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if items, err := GetItemsWithStatusStockCategory(status, stockID, startCatID); err != nil {
+		http.Error(w, err.Error(), 404)
+	} else {
+		json.NewEncoder(w).Encode(items)
+	}
+
+}
+
 //post items
 func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 
