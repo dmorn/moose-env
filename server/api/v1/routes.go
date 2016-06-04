@@ -19,12 +19,7 @@ var routes = Routes{
 		"/objects",
 		ObjectsHandler,
 	},
-	//Route{
-	//	"Users",
-	//	"GET",
-	//	"/users",
-	//	UsersHandler,
-	//},
+
 	Route{
 		"Categories",
 		"GET",
@@ -78,11 +73,18 @@ var routes = Routes{
 		"/objects/id={object_id}",
 		ObjectHandler,
 	},
+
 	Route{
 		"User",
 		"GET",
 		"/user",
 		UserHandler,
+	},
+	Route{
+		"Users",
+		"GET",
+		"/users/group_id={group_id}",
+		UsersHandler,
 	},
 
 	Route{

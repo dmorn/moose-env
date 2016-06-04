@@ -10,15 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//Getter handlers
-func UsersHandler(w http.ResponseWriter, r *http.Request) {
-
-	if users, err := GetUsers(); err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		json.NewEncoder(w).Encode(users)
-	}
-}
+//Getter handler
 
 func ObjectsHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -57,6 +49,24 @@ func StocksHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //getter handlers specific
+func UsersHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var groupID int
+	var err error
+
+	if groupID, err = strconv.Atoi(vars["group_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if users, err := GetUsers(groupID); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		json.NewEncoder(w).Encode(users)
+	}
+}
+
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := GetUserFromToken(r)

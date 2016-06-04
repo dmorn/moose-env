@@ -65,9 +65,9 @@ func GetObjects() (*Objects, error) {
 	return &objects, nil
 }
 
-func GetUsers() (*Users, error) {
+func GetUsers(id int) (*Users, error) {
 
-	const query = `select * from user;`
+	query := fmt.Sprintf("select * from user where group_id=%d", id)
 	rows, err := db.Query(query)
 
 	if err != nil {
