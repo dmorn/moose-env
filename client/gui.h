@@ -4,18 +4,16 @@
 #include <vector>
 #include <cpr/cpr.h>
 #include <json.hpp>
-#include "item.h"
 #include <termios.h>
 #include <unistd.h>
+#include "element_types.h"
 #include "user.h"
-//#include "category.h"
-//#include "menuItem.h"
 
 using namespace std;
 using json = nlohmann::json;
 class Gui{
 	
-	#define MENU_ITEMS 15
+	#define MENU_ELEMENTS 15
 	#define DISPLAY_WIDTH 66
 	#define POPUP_WIDTH 48
 	
@@ -24,21 +22,23 @@ class Gui{
 	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
+	#define ITEM_BY_STOCK "IBS"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
 	#define ITEM_PAGE "SIP"
 	#define ADD_ITEM_PAGE "AIP"
+	#define ADD_ITEM_SELECTED "AIS"
 	#define ADD_STOCK_PAGE "ASP"
 	#define OBJ_BY_CAT_LIST "OBC"
 	#define BUY_ITEM_PAGE "BIP"
 	#define PROFILE "PRO"
 	#define WISHLIST "PRO"
 	#define TEXT_POPUP "TPP"
+	#define NO_FUNCTION "NIL"
 
 	public:
 		Gui();
 		void print();
-		void addMenuItem(Item item);
 		void clearMenu();
 		void update(int keycode);
 		void mainMenu();
@@ -46,8 +46,8 @@ class Gui{
 	private:
 		void list();
 		void list(string list_type);
-		void addItemPage(Item item);
-		void itemPage(Item item);
+		void addItemPage(int obj_no);
+		void itemPage(int item_no);
 		void updateScrollPos();
 		bool hasResult(string query);
 		bool popupYesNo(string text);
@@ -66,9 +66,10 @@ class Gui{
 		int scrollPos;
 		string currMenu;
 		int currCategoryId;
-		std::vector<Item> items;
-		Item selectedItem;
+		std::vector<Element*> elements;
+		ItemItem* currentItem;
 		bool addItem, addItemToStock;
+		Stock * selectedStock;
 		User user;
 };
 

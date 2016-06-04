@@ -10,28 +10,26 @@ Gui::Gui(){
     currCategoryId=0;
 	addItem=false;
 	addItemToStock=false;
+	currentItem=NULL;
+	selectedStock=NULL;
 }
-
-void Gui::addMenuItem(Item item)
-{
-	if(items.size() < MENU_ITEMS)
-		items.push_back(item);
-}
-
 
 void Gui::clearMenu()
 {
-	items.clear();
+	for(int i=0; i<elements.size(); i++)
+	{
+		delete (elements.at(i));
+	}
+	elements.clear();
 	selectedMenuItem=0;
-	
 }
 
 
 void Gui::updateScrollPos(){
 	if(selectedMenuItem < scrollPos)
 		scrollPos = selectedMenuItem;
-	else if(selectedMenuItem >= scrollPos + MENU_ITEMS)
-		scrollPos = selectedMenuItem - MENU_ITEMS+1;
+	else if(selectedMenuItem >= scrollPos + MENU_ELEMENTS)
+		scrollPos = selectedMenuItem - MENU_ELEMENTS+1;
 }
 
 void Gui::update(int keycode) {
@@ -45,18 +43,18 @@ void Gui::update(int keycode) {
 	if(currMenu != LOGIN){
 
 		if(keycode == 65)
-			selectedMenuItem = (selectedMenuItem > 0) ? --selectedMenuItem : items.size() -1;
+			selectedMenuItem = (selectedMenuItem > 0) ? --selectedMenuItem : elements.size() -1;
 
 		else if(keycode == 66)
-			selectedMenuItem = (selectedMenuItem < items.size()-1) ? ++selectedMenuItem : 0; 
+			selectedMenuItem = (selectedMenuItem < elements.size()-1) ? ++selectedMenuItem : 0; 
 
 		else if(keycode == 67){
-		    selectedMenuItem += MENU_ITEMS;
-		    if(selectedMenuItem > items.size() - 1)
-		        selectedMenuItem=items.size()-1;  
+		    selectedMenuItem += MENU_ELEMENTS;
+		    if(selectedMenuItem > elements.size() - 1)
+		        selectedMenuItem=elements.size()-1;  
 		}
 		else if(keycode == 68){
-		    selectedMenuItem -= MENU_ITEMS;
+		    selectedMenuItem -= MENU_ELEMENTS;
 		    if(selectedMenuItem < 0) 
 				selectedMenuItem = 0;
 		}
@@ -75,9 +73,14 @@ void Gui::update(int keycode) {
 			}
 			else if(currMenu == CATEGORY_LIST && currCategoryId != 0)
 			{
-				auto cat = getJson("categories/id="+to_string(items.at(selectedMenuItem).getParentId()));
-		        currCategoryId = cat["parent_id"];		
-				list();
+				Category* category = (Category*)elements.at(selectedMenuItem);
+				if(category==NULL)
+					popupMessage("not a category.");
+				else {
+					auto cat = getJson("categories/id="+to_string(category->getParentId()));
+				    currCategoryId = cat["parent_id"];		
+					list();
+				}
 			}
 			else if(currMenu == OBJ_BY_CAT_LIST)
 			{
@@ -89,66 +92,71 @@ void Gui::update(int keycode) {
 				mainMenu();
 			}
 		}
-		else if(keycode == 10 && items.at(selectedMenuItem).getFunction() != "nil")
+		else if(keycode == 10 && elements.at(selectedMenuItem)->getFunction() != NO_FUNCTION)
 		{
-			if(items.at(selectedMenuItem).getFunction() == TEXT_POPUP)	//temporary menu change, no need to change currMenu
+			if(elements.at(selectedMenuItem)->getFunction() == TEXT_POPUP)	//temporary menu change, no need to change currMenu
 			{
-				popupMessage(items.at(selectedMenuItem).getName());
-
+				popupMessage(elements.at(selectedMenuItem)->getName());
 			}
 			else {
 
-			   	currMenu = items.at(selectedMenuItem).getFunction();
+			   	currMenu = elements.at(selectedMenuItem)->getFunction();
 
-				if(currMenu == ITEM_LIST || currMenu == PROFILE) 
+				if(currMenu == ITEM_LIST || currMenu == STOCK_LIST || currMenu == PROFILE) 
 					list();	
 
-				if(currMenu == CATEGORY_LIST) {
+				else if(currMenu == CATEGORY_LIST) {
 
-					if(hasResult("categories/parent_id="+to_string(items.at(selectedMenuItem).getId())))
+					Category* category = (Category*)elements.at(selectedMenuItem);
+					if(category==NULL)
+						popupMessage("not a category.");
+					else 
 					{
-						currCategoryId = items.at(selectedMenuItem).getId();
-						list();
-					}
-					else{
-						bool ok = popupYesNo("No subcategories, search in this category? (y/n)");
-						if(ok){
-							currCategoryId = items.at(selectedMenuItem).getId();
-							if(addItem)
-								list(OBJ_BY_CAT_LIST);
-							else
-								list(ITEM_LIST);
-						}
-					}	
-
-					if(items.at(selectedMenuItem).getId() == 0) {
-
-						currCategoryId = items.at(selectedMenuItem).getId();
-						list();	
-					}
-
-					/*
-					else if(addItem) {
-						if(hasResult("objects/cat="+to_string(items.at(selectedMenuItem).getId())))
+						if(hasResult("categories/parent_id="+to_string(category->getId())))
 						{
-							currCategoryId = items.at(selectedMenuItem).getId();
-							currMenu = OBJ_BY_CAT_LIST;
-							list();		
+							currCategoryId = category->getId();
+							list();
 						}
-						else{
-							popupMessage("No such items.");
+						else
+						{
+							if(popupYesNo("No subcategories, search in this category? (y/n)"))
+							{
+								currCategoryId = category->getId();
+								if(addItem)
+									list(OBJ_BY_CAT_LIST);
+								else
+									list(ITEM_LIST);
+							}
 						}	
-					}
-					else {
-						if(hasResult("items/start_cat_id="+to_string(items.at(selectedMenuItem).getId()))) {
-							currCategoryId = items.at(selectedMenuItem).getId();
-							currMenu = ITEM_LIST;
+
+						if(category->getId() == 0) {
+							currCategoryId = category->getId();
 							list();	
 						}
-						else{
-							popupMessage("No such items.");
-						}	
-					}*/
+
+						/*
+						else if(addItem) {
+							if(hasResult("objects/cat="+to_string(elements.at(selectedMenuItem).getId())))
+							{
+								currCategoryId = elements.at(selectedMenuItem).getId();
+								currMenu = OBJ_BY_CAT_LIST;
+								list();		
+							}
+							else{
+								popupMessage("No such objects.");
+							}	
+						}
+						else {
+							if(hasResult("items/start_cat_id="+to_string(elements.at(selectedMenuItem).getId()))) {
+								currCategoryId = elements.at(selectedMenuItem).getId();
+								currMenu = ITEM_LIST;
+								list();	
+							}
+							else{
+								popupMessage("No such items.");
+							}	
+						}*/
+					}
 				}
 
 				else if(currMenu == ADD_ITEM_PAGE || currMenu == ADD_STOCK_PAGE){
@@ -159,20 +167,28 @@ void Gui::update(int keycode) {
 					list(CATEGORY_LIST);
 				}
 				else if(currMenu == BUY_ITEM_PAGE){
-					int quantity = popupNumber("Quantity: ");
-					bool ok = popupYesNo("Order " + to_string(quantity) + "x " +selectedItem.getName()+ " for " + 
-										to_string(selectedItem.getCoins() * quantity) + " coins?");
-			
+					
+					if(currentItem==NULL)
+						popupMessage("No item selected.");
+					else {
+						int q = popupNumber("Quantity: ");
+						bool ok = popupYesNo("Order " + to_string(q) + "x " +currentItem->getName()+ " for " + 
+											to_string(currentItem->getCoins() * q) + " coins?");
+					}
+				}
+				else if(currMenu == ADD_ITEM_SELECTED) {
+
+					addItemPage(selectedMenuItem);
 				}
 
 				else if(currMenu == ITEM_PAGE) {
-					if(addItem) {
-						addItemPage(items.at(selectedMenuItem));
-					}
-					else {
-						tmpSelectedMenuItem = selectedMenuItem;
-						itemPage(items.at(selectedMenuItem));
-					}
+					tmpSelectedMenuItem = selectedMenuItem;
+					itemPage(selectedMenuItem);
+				}
+				else if(currMenu == ITEM_BY_STOCK) {
+					selectedStock = (Stock*) elements.at(selectedMenuItem);
+					elements.erase(elements.begin() + selectedMenuItem);
+					list(ITEM_LIST);
 				}
 			}
 		}
@@ -241,47 +257,162 @@ void Gui::mainMenu(){
     clearMenu();
 	addItem=false;
 	addItemToStock=false;
+	if(currentItem!=NULL);
+		delete currentItem;
+	currentItem=NULL;
+	if(selectedStock!=NULL);
+		delete selectedStock;
+	selectedStock=NULL;
 	title = "Welcome " + user.getName() + " to Moose env.";
 	footer="moose.env v.1";
-   	addMenuItem(Item("Item List", ITEM_LIST));
-   	addMenuItem(Item("Add item to stock",ADD_STOCK_PAGE));
-   	addMenuItem(Item("Add item to wishlist",ADD_ITEM_PAGE));
-   	addMenuItem(Item("Stock list",STOCK_LIST));
-   	addMenuItem(Item("View Profile",PROFILE));
+   	elements.push_back(new MenuItem("Item List", ITEM_LIST));
+   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_PAGE));
+   	elements.push_back(new MenuItem("Add item to wishlist",ADD_ITEM_PAGE));
+   	elements.push_back(new MenuItem("Stock list",STOCK_LIST));
+   	elements.push_back(new MenuItem("View Profile",PROFILE));
 }
 
-void Gui::addItemPage(Item item) {
+void Gui::addItemPage(int object_no) {
 	
+	Object* obj = (Object*)elements.at(object_no);
+	elements.erase(elements.begin() + object_no);
 	title = "Add Item";
     clearMenu();
-	addMenuItem(Item(item.getName(),CATEGORY_LIST));
+	elements.push_back(new MenuItem(obj->getName(),CATEGORY_LIST));
 
     std::system("clear");	
     int quantity = popupNumber("Quantity:");
     int coins = popupNumber("Coins:");
-	bool add = popupYesNo("Add: "+to_string(quantity) +"x " +item.getName() + " for " + to_string(coins) + " coins? (y/n)");
+	bool add = popupYesNo("Add: "+to_string(quantity) +"x " +obj->getName() + " for " + to_string(coins) + " coins? (y/n)");
 	
 	int stock_id=0;
-	Item newItem = Item(item.getName(),-1,item.getDescription(), coins, quantity, stock_id, item.getId());
 
 	json newItemJson = {
 	  {"status", (addItemToStock)?1:3},
 	  {"coins", coins},
 	  {"quantity", quantity},
 	  {"stock_id", stock_id},
-	  {"object_id", item.getId()},
+	  {"object_id", obj->getId()},
 	};
 
 	
 	addItem=false;
 	addItemToStock=false;
-	int newId = postJson("item",newItemJson).back()["id"];
-	newItem.setId(newId);
-	if(add)
-		itemPage(newItem);
+	if(add) {
+		int newId = postJson("item",newItemJson).back()["id"];
+		popupMessage("Item added with id " + to_string(newId));
+	}
 
-	else mainMenu();
+	mainMenu();
 	currCategoryId=0;
+}
+
+void Gui::itemPage(int item_no){
+	currentItem = (ItemItem*)elements.at(item_no);
+	elements.erase(elements.begin() + item_no);
+    clearMenu();
+	title = "Item nr." + to_string(currentItem->getId()) + " - " + currentItem->getName();
+
+	elements.push_back(new MenuItem(currentItem->getDescription(),TEXT_POPUP));
+	elements.push_back(new MenuItem("Coins:\t" + to_string(currentItem->getCoins())));
+	elements.push_back(new MenuItem("Quantity:\t" + to_string(currentItem->getQuantity())));
+	elements.push_back(new MenuItem("Stock:\t" + to_string(currentItem->getStockId())));
+	elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE));
+}
+
+void Gui::list(string list_type){
+	currMenu = list_type;
+    list();
+}
+
+void Gui::list(){
+
+	footer="moose.env v.1";
+		
+	if(currMenu == ITEM_LIST){
+		title = "Items";
+		footer = "Use arrow keys to move cursor";
+		string query = "items/start_cat_id="+to_string(currCategoryId);
+		//if(selectedStock != NULL)
+			//query +=
+		auto res = getJson(query);
+		clearMenu();
+		if(res.size() > 0)
+		{
+			for (auto& item : res) {
+				json object = item["object"];
+				ItemItem* it = new ItemItem(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],(int)item["stock_id"],(int)item["object_id"]);
+				elements.push_back(it);
+			}
+			
+			title = to_string(elements.size()) + " Items found";
+			if(selectedStock != NULL)
+				title += " @" + selectedStock->getName();
+		}
+		else if(currCategoryId != 0)
+		{	
+			getchar();
+			popupMessage("No items found, removing category filter");
+			currCategoryId=0;
+			list();
+		}	
+		else {
+			getchar();
+			popupMessage("No items found.");
+   			clearMenu();
+			mainMenu();
+		}
+	}	
+
+	else if(currMenu == CATEGORY_LIST){
+		title = "Categories";
+		footer = "Press TAB to select current category";
+		if(addItem) title += " - SELECT ITEM CATEGORY";
+
+	    clearMenu();
+		for (auto& item : getJson("categories/parent_id="+to_string(currCategoryId))) {
+			Category * c = new Category(item["name"],(int)item["id"],item["description"],currCategoryId);
+			elements.push_back(c);
+		}
+	}	
+
+	else if(currMenu == OBJ_BY_CAT_LIST){
+		title = "Select Object type";   
+
+	    clearMenu();
+		for (auto& item : getJson("objects/start_cat_id="+to_string(currCategoryId))) {
+			Object * o= new Object(item["name"],(int)item["id"],item["description"]);
+			elements.push_back(o);
+		}
+	}
+	else if(currMenu == STOCK_LIST){
+		title = "Stocks";
+		clearMenu();
+		for (auto& item : getJson("stocks")) {
+			Stock * s = new Stock(item["name"],(int)item["id"],item["location"]);
+			elements.push_back(s);
+		}
+	}
+
+	else if(currMenu == PROFILE){
+
+
+		title = "Profile";
+        
+		clearMenu();
+		elements.push_back(new MenuItem("Id:\t\t" + to_string(user.getId())));
+		elements.push_back(new MenuItem("Username:\t" + user.getUsername()));
+		elements.push_back(new MenuItem("Email:\t" + user.getEmail()));
+		elements.push_back(new MenuItem("Name:\t" + user.getName()));
+		elements.push_back(new MenuItem("Surname:\t" + user.getSurname()));
+		elements.push_back(new MenuItem("Credits:\t" + to_string(user.getBalance())));
+		elements.push_back(new MenuItem("Type:\t" + to_string(user.getType())));
+		elements.push_back(new MenuItem("Group:\t" + to_string(user.getGroupId())));
+
+	//REMOVE BEFORE PUBLISHMENT! ------------------------------------------------------------------------
+		elements.push_back(new MenuItem("Token:\t" + user.getToken()));
+	}
+
 }
 
 bool Gui::popupYesNo(string text) {
@@ -302,6 +433,7 @@ void Gui::popupMessage(string text) {
 	cout << centerText("+------------------------------------------------+",DISPLAY_WIDTH) << endl;
 	cout << centerText("|"+centerText("Press Enter to continue.",POPUP_WIDTH) +"|" ,DISPLAY_WIDTH) << endl;
 	cout << centerText("+------------------------------------------------+",DISPLAY_WIDTH) << endl;
+	cin.ignore(); 	
 	getchar();
     std::system("clear");	   
 }
@@ -327,104 +459,6 @@ string Gui::popupInput(string text) {
 	return input;
 }
 
-void Gui::itemPage(Item item){
-	
-    clearMenu();
-	title = "Item nr." + to_string(item.getId()) + " - " + item.getName();
-	selectedItem = item;
-	addMenuItem(Item(item.getDescription(),TEXT_POPUP));
-	addMenuItem(Item("Coins:\t" + to_string(item.getCoins())));
-	addMenuItem(Item("Quantity:\t" + to_string(item.getQuantity())));
-	addMenuItem(Item("Stock:\t" + to_string(item.getStockId())));
-	addMenuItem(Item("Buy Item",BUY_ITEM_PAGE));
-}
-
-void Gui::list(string list_type){
-	currMenu = list_type;
-    list();
-}
-
-void Gui::list(){
-
-	footer="moose.env v.1";
-		
-	if(currMenu == ITEM_LIST){
-		title = "Items";
-		footer = "Use arrow keys to move cursor";
-
-
-		auto res = getJson("items/start_cat_id="+to_string(currCategoryId));
-		clearMenu();
-		if(res.size() > 0)
-		{
-			for (auto& item : res) {
-				json object = item["object"];
-				items.push_back(Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],(int)item["stock_id"],(int)item["object_id"]));
-			}
-			
-			title = to_string(items.size()) + " Items found";
-		}
-		else if(currCategoryId != 0)
-		{	
-			getchar();
-			popupMessage("No items found, removing category filter");
-			currCategoryId=0;
-			list();
-		}	
-		else {
-			getchar();
-			popupMessage("No items found.");
-   			clearMenu();
-			mainMenu();
-		}
-	}	
-
-	else if(currMenu == CATEGORY_LIST){
-		title = "Categories";
-		footer = "Press TAB to select current category";
-		if(addItem) title += " - SELECT ITEM CATEGORY";
-
-	    clearMenu();
-		for (auto& item : getJson("categories/parent_id="+to_string(currCategoryId))) {
-			items.push_back(Item(item["name"],(int)item["id"],item["description"],currCategoryId));
-		}
-	}	
-
-	else if(currMenu == OBJ_BY_CAT_LIST){
-		title = "Select Object type";   
-
-	    clearMenu();
-		for (auto& item : getJson("objects/start_cat_id="+to_string(currCategoryId))) {
-			items.push_back(Item(item["name"],(int)item["id"],item["description"]));
-		}
-	}
-	else if(currMenu == STOCK_LIST){
-		title = "Stocks";
-        
-		clearMenu();
-	   	addMenuItem(Item("Stock"));
-	   	addMenuItem(Item("Stock"));
-	   	addMenuItem(Item("Stock"));
-	   	addMenuItem(Item("Stock"));
-	}
-
-	else if(currMenu == PROFILE){
-
-
-		title = "Profile";
-        
-		clearMenu();
-		addMenuItem(Item("Id:\t\t" + to_string(user.getId())));
-		addMenuItem(Item("Username:\t" + user.getUsername()));
-		addMenuItem(Item("Email:\t" + user.getEmail()));
-		addMenuItem(Item("Name:\t" + user.getName()));
-		addMenuItem(Item("Surname:\t" + user.getSurname()));
-		addMenuItem(Item("Credits:\t" + to_string(user.getBalance())));
-		addMenuItem(Item("Type:\t" + to_string(user.getType())));
-		addMenuItem(Item("Group:\t" + to_string(user.getGroupId())));
-	}
-
-}
 
 /*
 curl -H "Content-Type: application/json" -X POST -d '{"username":"matthias", "password": "test"}' http://localhost:8080/login
@@ -508,18 +542,18 @@ void Gui::print() {
 	if(scrollPos > 0)
 		cout << centerText("^",66);
 	cout<<endl;
-    for(int i=scrollPos; i<MENU_ITEMS + scrollPos; i++)
+    for(int i=scrollPos; i<MENU_ELEMENTS + scrollPos; i++)
 	{
-        if(i<items.size()){
+        if(i<elements.size()){
 			if(i==selectedMenuItem)
-				cout << "\033[30;47m"+limitText(to_string(i) + ": " + items.at(i).getName()) +"\033[0m" << endl;
+				cout << "\033[30;47m"+limitText(to_string(i) + ": " + elements.at(i)->getName()) +"\033[0m" << endl;
 			else
-				cout << limitText(to_string(i) + ": " + items.at(i).getName()) << endl;
+				cout << limitText(to_string(i) + ": " + elements.at(i)->getName()) << endl;
 
 		}
 		else cout << endl;
 	}
-	if(scrollPos + MENU_ITEMS <= items.size()-1)
+	if(scrollPos + MENU_ELEMENTS <= elements.size()-1)
 		cout << centerText("v",66);
 
 	cout << endl << "\033[30;47m"+centerText("-- " +footer + " --",66)+"\033[0m" << endl;
