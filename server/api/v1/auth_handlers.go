@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -65,6 +66,29 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(users)
 	}
+}
+
+func StocksHandlerWithUsername(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	var username string
+	var ok bool
+
+	if username, ok = vars["username"]; ok == false {
+		http.Error(w, errors.New("Unable to parse username.").Error(), 500)
+		return
+	}
+
+	if user, err := GetUserByUsername(username); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		if stocks, err := GetStocksWithStockTakerID(user.Id); err != nil {
+			http.Error(w, err.Error(), 500)
+		} else {
+			json.NewEncoder(w).Encode(stocks)
+		}
+	}
+
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {

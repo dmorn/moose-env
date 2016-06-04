@@ -138,6 +138,12 @@ var routes = Routes{
 		"/stock/id={stock_id}",
 		StockHandler,
 	},
+	Route{
+		"Stocks",
+		"GET",
+		"/stocks/{username}",
+		StocksHandlerWithUsername,
+	},
 
 	Route{
 		"Category",

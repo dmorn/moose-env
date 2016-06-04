@@ -299,6 +299,27 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 	return &objects, err
 }
 
+func GetStocksWithStockTakerID(id int) (*Stocks, error) {
+
+	query := fmt.Sprintf("select stock_id, name, location from group_stock where user_id=%d", id)
+	rows, err := db.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	stocks := Stocks{}
+	for rows.Next() {
+		stock := Stock{}
+
+		if err := rows.Scan(&stock.Id, &stock.Name, &stock.Location); err != nil {
+			return nil, err
+		}
+		stocks = append(stocks, stock)
+	}
+	return &stocks, nil
+}
+
 //GetItemsWithCategoriesAndSubcategories gets every item with the requested category_id and every item each subcategory recursevly
 func GetObjectsWithCategoriesAndSubcategories(id int) (*Objects, error) {
 

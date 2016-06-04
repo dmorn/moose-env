@@ -185,13 +185,6 @@ void Gui::update(int keycode) {
 							if(!res.empty()){
 								string d = res["data"];
 								popupMessage("Your reciept:\t"+d);
-							    auto response = cpr::Get(cpr::Url{"http://localhost:8080/test"});    
-
-								std::ofstream outfile ("receipt.jpeg");
-
-								outfile << response.text << std::endl;
-	
-								outfile.close();
 							}
 
 							mainMenu();
