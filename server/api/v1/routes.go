@@ -221,8 +221,8 @@ var routes = Routes{
 	Route{
 		"Item",
 		"POST",
-		"/purchase_wishlist/{stock_id}",
-		PurchaseWishlistHandler,
+		"/purchase_from_wishlist/{item_id}",
+		PurchaseWishlistItemHandler,
 	},
 	Route{
 		"Item",
@@ -242,5 +242,12 @@ var routes = Routes{
 		"POST",
 		"/category",
 		PostCategoryHandler,
+	},
+
+	Route{
+		"Stock",
+		"POST",
+		"/stock",
+		PostStockHandler,
 	},
 }

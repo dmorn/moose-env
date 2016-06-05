@@ -158,13 +158,19 @@ func PostItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PurchaseWishlistHandler(w http.ResponseWriter, r *http.Request) {
+func PurchaseWishlistItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	var stockID int
+	var itemID int
+	var item *Item
 	var err error
 
-	if stockID, err = strconv.Atoi(vars["stock_id"]); err != nil {
+	if itemID, err = strconv.Atoi(vars["item_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if item, err = GetItem(itemID); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -175,9 +181,9 @@ func PurchaseWishlistHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 
 		//it's a stock taker, check that he owns the stock
-		flag := intInSlice(stockID, list)
+		flag := intInSlice(item.StockId, list)
 		if flag {
-			if err := UpdateItemsStatusToPending(stockID); err != nil {
+			if err := UpdateItemStatusToPending(item.StockId, itemID); err != nil {
 				http.Error(w, err.Error(), 500)
 			} else {
 				json.NewEncoder(w).Encode("Done") //TODO: what should I put here?

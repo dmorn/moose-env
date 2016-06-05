@@ -631,6 +631,18 @@ func PostCategory(category *Category) error {
 	return err
 }
 
+func PostStock(stock *Stock) error {
+
+	var query string
+
+	query = fmt.
+		Sprintf("INSERT INTO `stock` (`name`, `location`) VALUES ('%s', '%s');",
+		stock.Name, stock.Location)
+
+	_, err := db.Query(query)
+	return err
+}
+
 //PATCH
 func AddAmountToUserBalance(user *User, amount int) error {
 
@@ -652,10 +664,11 @@ func WithdrawAmountToUserBalance(user *User, amount int) error {
 	return err
 }
 
-func UpdateItemsStatusToPending(stock_id int) error {
+func UpdateItemStatusToPending(stock_id int, id int) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d", stock_id)
+		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d AND item_id=%d", stock_id, id)
+
 	_, err := db.Query(query)
 	return err
 }
@@ -665,5 +678,6 @@ func PutItemsIntoStock(stock_id int) error {
 	query := fmt.
 		Sprintf("UPDATE `item` SET status=1 WHERE status=2 AND stock_id=%d", stock_id)
 	_, err := db.Query(query)
+
 	return err
 }

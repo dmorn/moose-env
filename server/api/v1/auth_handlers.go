@@ -348,6 +348,24 @@ func PostCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PostStockHandler(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var stock *Stock
+	err := decoder.Decode(&stock)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if err = PostStock(stock); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		json.NewEncoder(w).Encode(stock) //should return 201
+	}
+}
+
 //for tests. Remember to use an authenticated token
 //curl -H "Content-Type: application/json" -H "Authorization: Bearer G-ibUdic9Zjd0bk3qS5DHQg5ZFs=" -X POST http://localhost:8080/add_stock_taker/daniel/1
 func AddStockTakerHandler(w http.ResponseWriter, r *http.Request) {
