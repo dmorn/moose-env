@@ -301,7 +301,7 @@ func GetObjectByCategory(categoryID int) (*Objects, error) {
 
 func GetStocksWithStockTakerID(id int) (*Stocks, error) {
 
-	query := fmt.Sprintf("select stock_id, name, location from group_stock where user_id=%d", id)
+	query := fmt.Sprintf("select stock_id, name, location from group_stocks where user_id=%d", id)
 	rows, err := db.Query(query)
 
 	if err != nil {
