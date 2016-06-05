@@ -97,6 +97,7 @@ void Gui::update(int keycode) {
 		}
 		else if(keycode == 10 && elements.at(selectedMenuItem)->getFunction() != NO_FUNCTION)
 		{
+
 			if(elements.at(selectedMenuItem)->getFunction() == TEXT_POPUP)	//temporary menu change, no need to change currMenu
 			{
 				popupMessage(elements.at(selectedMenuItem)->getText());
@@ -105,7 +106,7 @@ void Gui::update(int keycode) {
 
 			   	currMenu = elements.at(selectedMenuItem)->getFunction();
 
-				if(currMenu == ITEM_LIST || currMenu == STOCK_LIST || currMenu == WISH_LIST || currMenu == PROFILE) 
+				if(currMenu == ITEM_LIST || currMenu == STOCK_LIST || currMenu == MY_STOCK_LIST || currMenu == WISH_LIST || currMenu == PENDING_LIST || currMenu == PROFILE) 
 					list();	
 
 				else if(currMenu == CATEGORY_LIST) {
@@ -131,46 +132,23 @@ void Gui::update(int keycode) {
 									list(ITEM_LIST);
 							}
 						}	
-
-						if(category->getId() == 0) {
-							currCategoryId = category->getId();
-							list();	
-						}
-
-						/*
-						else if(addItem) {
-							if(hasResult("objects/cat="+to_string(elements.at(selectedMenuItem).getId())))
-							{
-								currCategoryId = elements.at(selectedMenuItem).getId();
-								currMenu = OBJ_BY_CAT_LIST;
-								list();		
-							}
-							else{
-								popupMessage("No such objects.");
-							}	
-						}
-						else {
-							if(hasResult("items/start_cat_id="+to_string(elements.at(selectedMenuItem).getId()))) {
-								currCategoryId = elements.at(selectedMenuItem).getId();
-								currMenu = ITEM_LIST;
-								list();	
-							}
-							else{
-								popupMessage("No such items.");
-							}	
-						}*/
 					}
 				}
 
-				else if(currMenu == ADD_ITEM_PAGE || currMenu == ADD_STOCK_PAGE){
+				else if(currMenu == ADD_STOCK_PAGE){
 					addItem=true;
-					if(currMenu == ADD_STOCK_PAGE)
-						addItemToStock=true;
-				
-					list(STOCK_LIST);
+					addItemToStock=true;
+					list(MY_STOCK_LIST);
 				}
+
+				else if(currMenu == ADD_ITEM_PAGE){
+					addItem=true;
+					list(CATEGORY_LIST);
+				}
+
+
 				else if(currMenu == BUY_ITEM_PAGE){
-					
+				
 					if(currentItem==NULL)
 						popupMessage("No item selected.");
 					else {
@@ -181,24 +159,32 @@ void Gui::update(int keycode) {
 						bool ok = popupYesNo("Buy " + to_string(q) + "x " +currentItem->getName()+ " for " + 
 											to_string(currentItem->getCoins() * q) + " coins?");
 						if(ok){
-							json res = postJson("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
-							if(!res.empty()){
-								string d = res["data"];
-								popupMessage("Your reciept:\t"+d);
-							}
-
+							string s = "purchase/"+to_string(currentItem->getId()) +"/"+to_string(q);
+							auto r = cpr::Post(cpr::Url{URL+s},
+							cpr::Body{},
+							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
+										{"Content-Type", "application/json"}});	
+							string filename = "receipt_"+to_string(currentItem->getId())+to_string(currentItem->getQuantity())+".jpeg";
+							std::ofstream outfile (filename);
+							outfile << r.text << std::endl;
+							outfile.close();
+							popupMessage("reciept stored to '" + filename+ "'");
 							mainMenu();
 						}
 					}
 				}				
 				else if(currMenu == ORDER_ITEM_PAGE){
-					
+				
 					if(currentItem==NULL)
 						popupMessage("No item selected.");
 					else {
 						bool ok = popupYesNo("Order " + to_string(currentItem->getQuantity()) + "x " +currentItem->getName()+ " for " + 
 											to_string(currentItem->getCoins() * currentItem->getQuantity()) + " coins?");
-						if(ok) mainMenu();
+						if(ok) {
+							
+							addBalance(user.getUsername(),currentItem->getCoins() * currentItem->getQuantity());
+							mainMenu();
+						}
 					}
 				}
 				else if(currMenu == ADD_ITEM_SELECTED) {
@@ -219,6 +205,36 @@ void Gui::update(int keycode) {
 					else {
 						list(ITEM_LIST);
 					}
+				}
+				else if(currMenu == ADD_USER) {
+					string username = popupInput("Enter username");
+					string pw, pw2;
+					do
+					{
+						pw = popupInput("Enter password");
+						pw2 = popupInput("Enter password again");
+					} while(pw.compare(pw2) != 0);
+					
+					string email = popupInput("Enter Email");
+					string name = popupInput("Enter name");
+					string surname = popupInput("Enter surname");
+					int usertype = 3;
+					do {
+					 	usertype = popupNumber("Set user type: 1-admin, 2-stocktaker, 3-user");
+					} while(usertype >3 && usertype < 1);	
+					json userJson = {
+					  {"username", username},
+					  {"password", pw},
+					  {"email", email},
+					  {"name", name},
+					  {"type", usertype},
+					  {"group_id", 1}
+					};
+					auto r = postJson("register",userJson);
+					if(!r.is_null())
+						popupMessage("ok");
+					else
+						popupMessage("failed to add user.");
 				}
 			}
 		}
@@ -250,6 +266,7 @@ void Gui::update(int keycode) {
 	else {
 		
     	std::system("clear");
+		cout << "\033[30;47mWelcome to moose.env\033[0m" << endl;
 		string username, password;
 		cout << "please log in:\nusername: ";
 		cin >> username;
@@ -285,6 +302,12 @@ void Gui::update(int keycode) {
 void Gui::mainMenu(){
 	currMenu = MAIN_MENU;
     clearMenu();
+
+	selectedMenuItem=0;
+	tmpSelectedMenuItem=-1;
+    scrollPos=0;
+	currCategoryId=0;
+
 	addItem=false;
 	addItemToStock=false;
 	if(currentItem!=NULL);
@@ -293,14 +316,24 @@ void Gui::mainMenu(){
 	if(selectedStock!=NULL);
 		delete selectedStock;
 	selectedStock=NULL;
-	title = "Welcome " + user.getName() + " to Moose env.";
+
+	title = "Welcome " + user.getName() + " to Moose env." + to_string(user.getType());
 	footer="moose.env v.1";
-   	elements.push_back(new MenuItem("Item List", ITEM_LIST));
-   	elements.push_back(new MenuItem("Wishlist", WISH_LIST));
-   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_PAGE));
+	if(user.getType() <=2){
+	   	elements.push_back(new MenuItem("Item List", ITEM_LIST));
+	   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_PAGE));
+   		elements.push_back(new MenuItem("My Stocks",MY_STOCK_LIST));
+   		elements.push_back(new MenuItem("Show pending orders",PENDING_LIST));
+	}	
+
+	elements.push_back(new MenuItem("Wishlist", WISH_LIST));
    	elements.push_back(new MenuItem("Add item to wishlist",ADD_ITEM_PAGE));
    	elements.push_back(new MenuItem("Stock list",STOCK_LIST));
    	elements.push_back(new MenuItem("View Profile",PROFILE));
+
+	if(user.getType() == 1)
+		elements.push_back(new MenuItem("Add user", ADD_USER));
+	
 }
 
 void Gui::addItemPage(int object_no) {
@@ -312,8 +345,14 @@ void Gui::addItemPage(int object_no) {
 	elements.push_back(new MenuItem(obj->getText(),CATEGORY_LIST));
 
     std::system("clear");	
+	string link = popupInput("Link to product:");
+	
     int quantity = popupNumber("Quantity:");
+	while(quantity < 1)
+		quantity = popupNumber("Minimum 1 - Quantity:");
     int coins = popupNumber("Coins:");
+	while(coins < 1)
+		coins = popupNumber("Minimum 1 - Coins:");
 	bool add = popupYesNo("Add: "+to_string(quantity) +"x " +obj->getName() + " for " + to_string(coins) + " coins? (y/n)");
 	
 	int stock_id=0;
@@ -326,6 +365,7 @@ void Gui::addItemPage(int object_no) {
 	  {"quantity", quantity},
 	  {"stock_id", stock_id},
 	  {"object_id", obj->getId()},
+	  {"link",link}
 	};
 
 	
@@ -350,6 +390,7 @@ void Gui::itemPage(int item_no){
 	elements.push_back(new MenuItem("Coins:\t" + to_string(currentItem->getCoins())));
 	elements.push_back(new MenuItem("Quantity:\t" + to_string(currentItem->getQuantity())));
 	elements.push_back(new MenuItem("Stock:\t" + currentItem->getStock()));
+	elements.push_back(new MenuItem("Link:\t" + currentItem->getLink()));
 	if(currentItem->getQuantity() > 0){
 		switch(currentItem->getStatus()) {
 			case 1: elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE)); break;
@@ -370,6 +411,8 @@ void Gui::list(){
 
 	footer="moose.env v.1";
 
+
+
 	if(currMenu == WISH_LIST){
 		title = "Wishlist";
 		footer = "Use arrow keys to move cursor";
@@ -379,7 +422,7 @@ void Gui::list(){
 		{
 			for (auto& item : res) {
 				json object = item["object"];
-				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],item["stock"]["name"],(int)item["object_id"],(int)item["status"]);
+				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],"",(int)item["object_id"],(int)item["status"],item["link"]);
 				elements.push_back(it);
 			}
 			
@@ -392,8 +435,29 @@ void Gui::list(){
 			mainMenu();
 		}
 	}
-		
-	if(currMenu == ITEM_LIST){
+	else if(currMenu == PENDING_LIST){
+		title = "Pending orders";
+		footer = "Use arrow keys to move cursor";
+		auto res = getJson("items/pending");
+		clearMenu();
+		if(res.size() > 0)
+		{
+			for (auto& item : res) {
+				json object = item["object"];
+				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],"",(int)item["object_id"],(int)item["status"],item["link"]);
+				elements.push_back(it);
+			}
+			
+			title = to_string(elements.size()) + " Items pending";
+		}
+		else {
+			getchar();
+			popupMessage("No items pending.");
+   			clearMenu();
+			mainMenu();
+		}
+	}	
+	else if(currMenu == ITEM_LIST){
 		title = "Items";
 		footer = "Use arrow keys to move cursor";
 		string query = "items/start_cat_id="+to_string(currCategoryId);
@@ -405,7 +469,7 @@ void Gui::list(){
 		{
 			for (auto& item : res) {
 				json object = item["object"];
-				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],item["stock"]["name"],(int)item["object_id"],(int)item["status"]);
+				Item* it = new Item(object["name"],(int)item["id"],object["description"],(int)item["coins"],(int)item["quantity"],item["stock"]["name"],(int)item["object_id"],(int)item["status"],item["link"]);
 				elements.push_back(it);
 			}
 			
@@ -441,7 +505,7 @@ void Gui::list(){
 	}	
 
 	else if(currMenu == OBJ_BY_CAT_LIST){
-		title = "Select Object type";   
+		title = "Select Object type" + elements.size();   
 
 	    clearMenu();
 		for (auto& item : getJson("objects/start_cat_id="+to_string(currCategoryId))) {
@@ -453,6 +517,14 @@ void Gui::list(){
 		title = "Stocks";
 		clearMenu();
 		for (auto& item : getJson("stocks")) {
+			Stock * s = new Stock(item["name"],(int)item["id"],item["location"]);
+			elements.push_back(s);
+		}
+	}	
+	else if(currMenu == MY_STOCK_LIST){
+		title = "My Stocks";
+		clearMenu();
+		for (auto& item : getJson("stocks/"+user.getUsername())) {
 			Stock * s = new Stock(item["name"],(int)item["id"],item["location"]);
 			elements.push_back(s);
 		}
@@ -475,6 +547,12 @@ void Gui::list(){
 
 	//REMOVE BEFORE PUBLISHMENT! ------------------------------------------------------------------------
 		elements.push_back(new MenuItem("Token:\t" + user.getToken()));
+	}
+
+	if(elements.empty())
+	{
+		popupMessage("No result, switching to main menu");
+		mainMenu();
 	}
 
 }
@@ -530,14 +608,22 @@ curl -H "Content-Type: application/json" -X POST -d '{"username":"matthias", "pa
 
 json Gui::getJson(string content) {
 
-	auto response = cpr::Get(cpr::Url{URL+content},
+	auto r = cpr::Get(cpr::Url{URL+content},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()}});
-	if(response.text == ("unauthorized")){
-		currMenu = LOGIN;
-		return NULL;
+	if(!isJson(r))
+	{
+		if(r.text == ("unauthorized"))
+			currMenu = LOGIN;
+		else {
+			popupMessage(r.text);
+			mainMenu();
+		}
+
+		json eJ;
+		return eJ;
 	}
 	else
-		return json::parse(response.text);
+		return json::parse(r.text);
 }
 
 json Gui::postJsonNoToken(string content, json data) {
@@ -545,7 +631,14 @@ json Gui::postJsonNoToken(string content, json data) {
 	auto r = cpr::Post(cpr::Url{URL+content},
 	cpr::Body{data.dump()},
 	cpr::Header{{"Content-Type", "application/json"}});
-	if(r.status_code == 404) {
+	if(!isJson(r)) {
+		if(currMenu == LOGIN){
+			popupMessage("Login failed.");
+		}
+		else {
+			popupMessage(r.text);
+			mainMenu();	
+		}
 		json empty;	
 		return empty;
 	}
@@ -558,15 +651,16 @@ json Gui::postJson(string content) {
 	cpr::Body{},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 				{"Content-Type", "application/json"}});
-	if(r.text[0] == '{')
-		return json::parse(r.text);
-	
-	else 
+	popupMessage(r.text);
+	if(!isJson(r)) {
 		popupMessage(r.text);
-	json eJ;
-	return eJ;
-
+		mainMenu();
+		json eJ;
+		return eJ;
+	}
+	return json::parse(r.text);
 }
+
 
 json Gui::postJson(string content, json data) {
 
@@ -574,12 +668,29 @@ json Gui::postJson(string content, json data) {
 	cpr::Body{data.dump()},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 				{"Content-Type", "application/json"}});
+	if(!isJson(r)) {
+		popupMessage(r.text);
+		mainMenu();
+		json eJ;
+		return eJ;
+	}
 	return json::parse(r.text);
 
 }
 
+void Gui::addBalance(string username, int amount) {
+	postJson("balance/"+username+"/add="+to_string(amount));
+}
+void Gui::withdrawBalance(string username, int amount) {
+	postJson("balance/"+username+"/withdraw="+to_string(amount));
+}
+
 bool Gui::hasResult(string query) {	
 	return getJson(query).size() > 0;
+}
+
+bool Gui::isJson(cpr::Response r) {
+	return r.text[0] == '{' || r.text[0] == '[';
 }
 
 bool Gui::isNumber(string s) {

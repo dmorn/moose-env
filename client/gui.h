@@ -6,6 +6,7 @@
 #include <json.hpp>
 #include <termios.h>
 #include <unistd.h>
+#include <fstream>  
 #include "element_types.h"
 #include "user.h"
 
@@ -23,9 +24,11 @@ class Gui{
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
 	#define WISH_LIST "SWL"
+	#define PENDING_LIST "SPL"
 	#define ITEM_BY_STOCK "IBS"
 	#define CATEGORY_LIST "SCL"
 	#define STOCK_LIST "SSL"
+	#define MY_STOCK_LIST "MSL"
 	#define ITEM_PAGE "SIP"
 	#define ADD_ITEM_PAGE "AIP"
 	#define ADD_ITEM_SELECTED "AIS"
@@ -34,6 +37,7 @@ class Gui{
 	#define BUY_ITEM_PAGE "BIP"
 	#define ORDER_ITEM_PAGE "OIP"
 	#define PROFILE "PRO"
+	#define ADD_USER "ADU"
 	#define WISHLIST "PRO"
 	#define TEXT_POPUP "TPP"
 	#define NO_FUNCTION "NIL"
@@ -51,6 +55,8 @@ class Gui{
 		void addItemPage(int obj_no);
 		void itemPage(int item_no);
 		void updateScrollPos();
+		void addBalance(string username, int amount);
+		void withdrawBalance(string username, int amount);
 		bool hasResult(string query);
 		bool popupYesNo(string text);
 		int popupNumber(string text);
@@ -60,6 +66,7 @@ class Gui{
 		string fillWithSpace(int cnt);
 		string limitText(string text);
 		bool isNumber(string s);
+		bool isJson(cpr::Response r);
 		json getJson(string content);
 		json postJson(string content);
 		json postJson(string content, json data);

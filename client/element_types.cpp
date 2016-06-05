@@ -55,7 +55,7 @@ const string& MenuItem::getFunction() const {
 
 Item::Item() { };
 
-Item::Item(string name, int id, string description, int coins, int quantity, string stock, int object_id, int status) :
+Item::Item(string name, int id, string description, int coins, int quantity, string stock, int object_id, int status, string link) :
 	name(name),
 	id(id),
 	description(description),
@@ -64,7 +64,8 @@ Item::Item(string name, int id, string description, int coins, int quantity, str
 	stock(stock),
 	object_id(object_id),
 	status(status),
-	function("SIP")
+	function("SIP"),
+	link(link)
 {
 	text = to_string(id) + ": " + name + "\t" + to_string(coins) + " coins; " + to_string(quantity) + "x in ";
 	switch(status){
@@ -72,11 +73,12 @@ Item::Item(string name, int id, string description, int coins, int quantity, str
 		case 2: text += "pending list"; break;
 		case 3: text += "wishlist"; break;
 	}
-	text+= " @"+stock;
+	if(stock != "")
+		text+= " @"+stock;
 
 }
 
-Item::Item(string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status) :
+Item::Item(string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status, string link) :
 	text(text),
 	name(name),
 	id(id),
@@ -86,7 +88,8 @@ Item::Item(string text, string name, int id, string description, int coins, int 
 	stock(stock),
 	object_id(object_id),
 	status(status),
-	function("SIP")
+	function("SIP"),
+	link(link)
 { }
 
 const string& Item::getText() const {
@@ -120,6 +123,9 @@ const int Item::getObjectId() const{
 }
 const int Item::getStatus() const{
 	return status;
+}
+const string& Item::getLink() const{
+	return link;
 }
 
 // OBJECT
