@@ -175,12 +175,17 @@ void Gui::update(int keycode) {
 						popupMessage("No item selected.");
 					else {
 						int q = popupNumber("Quantity: ");
+						while (currentItem->getQuantity() < q) {
+							q = popupNumber("Not enough aviable. Quantity: ");
+						}
 						bool ok = popupYesNo("Buy " + to_string(q) + "x " +currentItem->getName()+ " for " + 
 											to_string(currentItem->getCoins() * q) + " coins?");
 						if(ok){
-							popupMessage("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
-							postJson("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
-							popupMessage("Ok");
+							json res = postJson("purchase/"+to_string(currentItem->getId()) +"/"+to_string(q));
+							if(!res.empty()){
+								string d = res["data"];
+								popupMessage("Your reciept:\t"+d);
+							}
 
 							mainMenu();
 						}
@@ -345,12 +350,15 @@ void Gui::itemPage(int item_no){
 	elements.push_back(new MenuItem("Coins:\t" + to_string(currentItem->getCoins())));
 	elements.push_back(new MenuItem("Quantity:\t" + to_string(currentItem->getQuantity())));
 	elements.push_back(new MenuItem("Stock:\t" + currentItem->getStock()));
-
-	switch(currentItem->getStatus()) {
-		case 1: elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE)); break;
-		case 2: elements.push_back(new MenuItem("Item ordered but not yet in stock.")); break;
-		case 3: elements.push_back(new MenuItem("Order and remove from wishlist",ORDER_ITEM_PAGE)); break;
+	if(currentItem->getQuantity() > 0){
+		switch(currentItem->getStatus()) {
+			case 1: elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE)); break;
+			case 2: elements.push_back(new MenuItem("Item ordered but not yet in stock.")); break;
+			case 3: elements.push_back(new MenuItem("Order and remove from wishlist",ORDER_ITEM_PAGE)); break;
+		}
 	}
+	else
+		elements.push_back(new MenuItem("Not available"));
 }
 
 void Gui::list(string list_type){
@@ -522,7 +530,7 @@ curl -H "Content-Type: application/json" -X POST -d '{"username":"matthias", "pa
 
 json Gui::getJson(string content) {
 
-	auto response = cpr::Get(cpr::Url{"http://localhost:8080/"+content},
+	auto response = cpr::Get(cpr::Url{URL+content},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()}});
 	if(response.text == ("unauthorized")){
 		currMenu = LOGIN;
@@ -534,7 +542,7 @@ json Gui::getJson(string content) {
 
 json Gui::postJsonNoToken(string content, json data) {
 
-	auto r = cpr::Post(cpr::Url{"http://localhost:8080/"+content},
+	auto r = cpr::Post(cpr::Url{URL+content},
 	cpr::Body{data.dump()},
 	cpr::Header{{"Content-Type", "application/json"}});
 	if(r.status_code == 404) {
@@ -546,17 +554,23 @@ json Gui::postJsonNoToken(string content, json data) {
 
 json Gui::postJson(string content) {
 
-	auto r = cpr::Post(cpr::Url{"http://localhost:8080/"+content},
+	auto r = cpr::Post(cpr::Url{URL+content},
+	cpr::Body{},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 				{"Content-Type", "application/json"}});
-	popupMessage(r.text);
-	return json::parse(r.text);
+	if(r.text[0] == '{')
+		return json::parse(r.text);
+	
+	else 
+		popupMessage(r.text);
+	json eJ;
+	return eJ;
 
 }
 
 json Gui::postJson(string content, json data) {
 
-	auto r = cpr::Post(cpr::Url{"http://localhost:8080/"+content},
+	auto r = cpr::Post(cpr::Url{URL+content},
 	cpr::Body{data.dump()},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 				{"Content-Type", "application/json"}});

@@ -18,7 +18,7 @@ class Gui{
 	#define POPUP_WIDTH 48
 	
 
-
+	#define URL "http://localhost:8080/"
 	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"
