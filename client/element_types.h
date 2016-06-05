@@ -42,14 +42,15 @@ class MenuItem : public Element {
 class Item : public Element {
 	public:
 		Item();
-		Item (string name, int id, string description, int coins, int quantity, string stock, int object_id, int status);
-		Item (string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status);
+		Item (string name, int id, string description, int coins, int quantity, string stock, int object_id, int status, string link);
+		Item (string text, string name, int id, string description, int coins, int quantity, string stock, int object_id, int status, string link);
 
 		virtual const string& getText() const;
 		virtual const string& getFunction() const;
 		const string& getName() const;
 		const string& getDescription() const;
 		const string& getStock() const;
+		const string& getLink() const;
 		const int getId() const;
 		const int getCoins() const;
 		const int getQuantity() const;
@@ -57,7 +58,7 @@ class Item : public Element {
 		const int getStatus() const;
 
 	private:
-		string text, name, function, description, stock;
+		string text, name, function, description, stock, link;
 		int id, coins, quantity, object_id, status;
 };
 
