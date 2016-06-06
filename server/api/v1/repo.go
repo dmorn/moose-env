@@ -586,7 +586,7 @@ func PostUser(user *User) error {
 	hasher.Write([]byte(user.Password))
 	hash := hex.EncodeToString(hasher.Sum(nil))
 
-	user.Type = 1 //is a normal user
+	//user.Type = 1 //is a normal user
 
 	query := fmt.
 		Sprintf("INSERT INTO `user` (`username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES ('%s', '%s', '%s', '%s', '%s', 0, 1, %d)",

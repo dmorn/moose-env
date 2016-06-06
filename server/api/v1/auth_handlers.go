@@ -237,6 +237,32 @@ func CategoriesWithParentHandler(w http.ResponseWriter, r *http.Request) {
 
 //post handlers
 
+//curl -H "Content-Type: application/json" -X POST -d '{"username":"matex", "password": "hello", "email": "ciao@ciao.com", "name": "phil", "surname": "hexx", "group_id": 1}' http://localhost:8080/register
+func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
+
+	if _, _, err := IsUserStockTaker(r); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var user *User
+	err := decoder.Decode(&user)
+	if err != nil {
+		fmt.Println("Error Decoding Form")
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	if err := PostUser(user); err != nil {
+		http.Error(w, err.Error(), 500)
+	} else {
+		user, _ := GetUserByUsername(user.Username)
+		json.NewEncoder(w).Encode(user) //should return 201
+	}
+
+}
+
 func UserWithdrawBalance(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)

@@ -47,24 +47,3 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 	}
 }
-
-//curl -H "Content-Type: application/json" -X POST -d '{"username":"matex", "password": "hello", "email": "ciao@ciao.com", "name": "phil", "surname": "hexx", "group_id": 1}' http://localhost:8080/register
-func RegistrationHandler(w http.ResponseWriter, r *http.Request) {
-
-	decoder := json.NewDecoder(r.Body)
-	var user *User
-	err := decoder.Decode(&user)
-	if err != nil {
-		fmt.Println("Error Decoding Form")
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	if err := PostUser(user); err != nil {
-		http.Error(w, err.Error(), 500)
-	} else {
-		user, _ := GetUserByUsername(user.Username)
-		json.NewEncoder(w).Encode(user) //should return 201
-	}
-
-}
