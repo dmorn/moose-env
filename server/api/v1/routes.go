@@ -227,8 +227,8 @@ var routes = Routes{
 	Route{
 		"Item",
 		"POST",
-		"/put_into_stock/{stock_id}",
-		PutPurchasesIntoStockHandler,
+		"/put_into_stock/{item_id}",
+		PutPurchasedItemIntoStockHandler,
 	},
 	Route{
 		"Item",

@@ -183,7 +183,7 @@ func PurchaseWishlistItemHandler(w http.ResponseWriter, r *http.Request) {
 		//it's a stock taker, check that he owns the stock
 		flag := intInSlice(item.StockId, list)
 		if flag {
-			if err := UpdateItemStatusToPending(item.StockId, itemID); err != nil {
+			if err := UpdateItemStatusToPending(item); err != nil {
 				http.Error(w, err.Error(), 500)
 			} else {
 				json.NewEncoder(w).Encode("Done") //TODO: what should I put here?
@@ -195,13 +195,18 @@ func PurchaseWishlistItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
+func PutPurchasedItemIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	var stockID int
+	var itemID int
+	var item *Item
 	var err error
 
-	if stockID, err = strconv.Atoi(vars["stockID"]); err != nil {
+	if itemID, err = strconv.Atoi(vars["item_id"]); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if item, err = GetItem(itemID); err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
@@ -212,9 +217,9 @@ func PutPurchasesIntoStockHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 
 		//it's a stock taker, check that he owns the stock
-		flag := intInSlice(stockID, list)
+		flag := intInSlice(item.StockId, list)
 		if flag {
-			if err := PutItemsIntoStock(stockID); err != nil {
+			if err := PutItemIntoStock(item); err != nil {
 				http.Error(w, err.Error(), 500)
 			} else {
 				json.NewEncoder(w).Encode("Done") //TODO: what should I put here?

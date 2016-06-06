@@ -631,7 +631,7 @@ func PostCategory(category *Category) error {
 	return err
 }
 
-func PostStock(stock *Stock) error {
+func PostStock(stock *Stock) (*Stock, error) {
 
 	var query string
 
@@ -639,8 +639,18 @@ func PostStock(stock *Stock) error {
 		Sprintf("INSERT INTO `stock` (`name`, `location`) VALUES ('%s', '%s');",
 		stock.Name, stock.Location)
 
-	_, err := db.Query(query)
-	return err
+	if _, err := db.Query(query); err != nil {
+		return nil, err
+	}
+
+	query = fmt.
+		Sprintf("SELECT * FROM stock where name='%s' AND location='%s'", stock.Name, stock.Location)
+
+	newstock := Stock{}
+	err := db.QueryRow(query).
+		Scan(&newstock.Id, &newstock.Name, &newstock.Location)
+
+	return &newstock, err
 }
 
 //PATCH
@@ -664,19 +674,19 @@ func WithdrawAmountToUserBalance(user *User, amount int) error {
 	return err
 }
 
-func UpdateItemStatusToPending(stock_id int, id int) error {
+func UpdateItemStatusToPending(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d AND item_id=%d", stock_id, id)
+		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d AND item_id=%d", item.StockId, item.Id)
 
 	_, err := db.Query(query)
 	return err
 }
 
-func PutItemsIntoStock(stock_id int) error {
+func PutItemIntoStock(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET status=1 WHERE status=2 AND stock_id=%d", stock_id)
+		Sprintf("UPDATE `item` SET status=1 WHERE status=2 AND stock_id=%d AND item_id=%d", item.StockId, item.Id)
 	_, err := db.Query(query)
 
 	return err

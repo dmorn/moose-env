@@ -348,6 +348,7 @@ func PostCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//curl -H "Content-Type: application/json" -H "Authorization: Bearer 4xdkWnuZheOOhhut7UptOxlmhm8=" -X POST -d '{"name":"teststock", "location": "haiaa 101"}' http://localhost:8080/stock
 func PostStockHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -359,10 +360,11 @@ func PostStockHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = PostStock(stock); err != nil {
+	if newstock, err := PostStock(stock); err != nil {
 		http.Error(w, err.Error(), 500)
 	} else {
-		json.NewEncoder(w).Encode(stock) //should return 201
+
+		json.NewEncoder(w).Encode(newstock) //should return 201
 	}
 }
 
