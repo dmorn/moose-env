@@ -682,7 +682,12 @@ void Gui::list(){
 
 	else if(currMenu == PROFILE){
 
-		title = "Profile";
+		//update user
+        json uJ = getJson("user");
+	    user = User((int)uJ["id"], uJ["username"], uJ["email"], uJ["name"], uJ["surname"], (int)uJ["balance"], (int)uJ["type"], (int)uJ["group_id"], user.getToken());
+        
+        
+        title = "Profile";
         
 		clearMenu();
 		elements.push_back(new MenuItem("Id:\t\t" + to_string(user.getId())));
