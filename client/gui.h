@@ -19,7 +19,7 @@ class Gui{
 	#define POPUP_WIDTH 48
 	
 
-	#define URL "http://localhost:8080/"
+	#define URL "http://rpi3-01.unibz.it:8080/"
 	#define LOGIN "LGI"
 	#define MAIN_MENU "SMM"
 	#define ITEM_LIST "SIL"

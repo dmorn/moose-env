@@ -37,7 +37,7 @@ void Gui::update(int keycode) {
 	//65 U , 68 L , 67 R, 66 D, 127 BACK, 10 ENTER, 32 SPACE, 9 TAB
 
 	
-	getJson("user");
+	//getJson("user");
 
 
 	if(currMenu != LOGIN){
@@ -251,7 +251,8 @@ void Gui::update(int keycode) {
 					}
 				}
 				else if(currMenu == ADD_USER) {
-					string username = popupInput("Enter username");
+					popupMessage("Register new user");
+                    string username = popupInput("Enter username");
 					string pw, pw2;
 					do
 					{
@@ -281,6 +282,7 @@ void Gui::update(int keycode) {
 						popupMessage("failed to add user.");
 				}
 				else if(currMenu == ADD_STOCK) {
+                    popupMessage("Add Stock");
                   
 					string name = popupInput("Enter stock name");
 					string location = popupInput("Enter stock location");
@@ -303,11 +305,18 @@ void Gui::update(int keycode) {
 						popupMessage("failed to add stock.");
 				}
 				else if(currMenu == ADD_BALANCE) {
-					                           
-                    popupInput("input username");                    
+					
+                    popupMessage("Add Balance");                          
                     string username = popupInput("input username");
                     string balance = popupInput("input amount");
-                    int b = stoi(balance);
+                    int b;
+                    try {
+                        b = stoi(balance);    
+                    } catch (...) {
+                        popupMessage("invalid balance input");
+                        b = 0;
+                    }
+                                        
 					addBalance(username,b);
 					mainMenu();
 				}
@@ -405,24 +414,28 @@ void Gui::mainMenu(){
 
 	title = "Welcome " + user.getName() + " to Moose env." + to_string(user.getType());
 	footer="moose.env v.1";
-	   	elements.push_back(new MenuItem("Item List", ITEM_LIST));
-	if(user.getType() ==2){
-	   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_ITEM_PAGE));
+	
+    elements.push_back(new MenuItem("View Profile",PROFILE));
+    elements.push_back(new MenuItem("Item List", ITEM_LIST));
+	
+    if(user.getType() ==2){
+	   	elements.push_back(new MenuItem("My Stocks",MY_STOCK_LIST));
    		elements.push_back(new MenuItem("Show pending orders",PENDING_LIST));
 	}	
 
 	elements.push_back(new MenuItem("Wishlist", WISH_LIST));
-   	elements.push_back(new MenuItem("Add item to wishlist",ADD_ITEM_PAGE));
    	elements.push_back(new MenuItem("Stock list",STOCK_LIST));
-   	elements.push_back(new MenuItem("View Profile",PROFILE));
+    elements.push_back(new MenuItem("Add item to wishlist",ADD_ITEM_PAGE));
+   	
+   	
+    elements.push_back(new MenuItem("Add category", ADD_CATEGORY));
+	elements.push_back(new MenuItem("Add object", ADD_OBJECT));
 
 	if(user.getType() == 2) {
-   		elements.push_back(new MenuItem("Add stock",ADD_STOCK));
+   		
+        elements.push_back(new MenuItem("Add stock",ADD_STOCK));
+        elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_ITEM_PAGE));
 		elements.push_back(new MenuItem("Add user", ADD_USER));
-   		elements.push_back(new MenuItem("My Stocks",MY_STOCK_LIST));
-		elements.push_back(new MenuItem("Add category", ADD_CATEGORY));
-		elements.push_back(new MenuItem("Add object", ADD_OBJECT));
-
 	}
 	
 }
@@ -669,7 +682,6 @@ void Gui::list(){
 
 	else if(currMenu == PROFILE){
 
-
 		title = "Profile";
         
 		clearMenu();
@@ -684,7 +696,9 @@ void Gui::list(){
 
 	//REMOVE BEFORE PUBLISHMENT! ------------------------------------------------------------------------
 		elements.push_back(new MenuItem("Token:\t" + user.getToken()));
-		elements.push_back(new MenuItem("Add credits to user",ADD_BALANCE));
+		
+        if (user.getType() == 2) {elements.push_back(new MenuItem("Add credits to user",ADD_BALANCE));}
+        
 	}
 
 	if(elements.empty())
