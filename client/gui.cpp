@@ -123,11 +123,15 @@ void Gui::update(int keycode) {
 						}
 						else
 						{
-							if(popupYesNo("No subcategories, search in this category? (y/n)"))
+							if(popupYesNo("No subcategories, use "+category->getName()+"? (y/n)"))
 							{
 								currCategoryId = category->getId();
 								if(addItem)
 									list(OBJ_BY_CAT_LIST);
+								else if(addCategory)
+									addCategoryPage();	
+								else if(addObject)
+									addObjectPage();
 								else
 									list(ITEM_LIST);
 							}
@@ -135,7 +139,7 @@ void Gui::update(int keycode) {
 					}
 				}
 
-				else if(currMenu == ADD_STOCK_PAGE){
+				else if(currMenu == ADD_STOCK_ITEM_PAGE){
 					addItem=true;
 					addItemToStock=true;
 					list(MY_STOCK_LIST);
@@ -143,9 +147,22 @@ void Gui::update(int keycode) {
 
 				else if(currMenu == ADD_ITEM_PAGE){
 					addItem=true;
-					list(CATEGORY_LIST);
+					list(STOCK_LIST);
 				}
 
+				else if(currMenu == ADD_CATEGORY){
+					if(currCategoryId == 0 && addCategory == false)
+					{
+						addCategory=true;
+						list(CATEGORY_LIST);	
+					}
+				}
+
+				else if(currMenu == ADD_OBJECT) {
+
+					addObject=true;
+					list(CATEGORY_LIST);	
+				}
 
 				else if(currMenu == BUY_ITEM_PAGE){
 				
@@ -165,10 +182,14 @@ void Gui::update(int keycode) {
 							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 										{"Content-Type", "application/json"}});	
 							string filename = "receipt_"+to_string(currentItem->getId())+to_string(currentItem->getQuantity())+".jpeg";
-							std::ofstream outfile (filename);
-							outfile << r.text << std::endl;
-							outfile.close();
-							popupMessage("reciept stored to '" + filename+ "'");
+							if(r.text[0] = 'N')
+								popupMessage("Not enough balance.");
+							else {
+								std::ofstream outfile (filename);
+								outfile << r.text << std::endl;
+								outfile.close();
+								popupMessage("reciept stored to '" + filename+ "'");
+							}
 							mainMenu();
 						}
 					}
@@ -180,9 +201,32 @@ void Gui::update(int keycode) {
 					else {
 						bool ok = popupYesNo("Order " + to_string(currentItem->getQuantity()) + "x " +currentItem->getName()+ " for " + 
 											to_string(currentItem->getCoins() * currentItem->getQuantity()) + " coins?");
-						if(ok) {
-							
+						if(ok) {							
+							string s = "purchase_from_wishlist/"+to_string(currentItem->getId());
+							auto r = cpr::Post(cpr::Url{URL+s},
+							cpr::Body{},
+							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
+										{"Content-Type", "application/json"}});	
+							popupMessage("Status changed to pending.");
 							addBalance(user.getUsername(),currentItem->getCoins() * currentItem->getQuantity());
+							mainMenu();
+						}
+					}
+				}
+				else if(currMenu == CONFIRM_ITEM_PAGE){
+				
+					if(currentItem==NULL)
+						popupMessage("No item selected.");
+					else {
+						bool ok = popupYesNo("Confirm item is in stock?");
+						if(ok) {	
+				
+							string s = "put_into_stock/"+to_string(currentItem->getId());
+							auto r = cpr::Post(cpr::Url{URL+s},
+							cpr::Body{},
+							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
+										{"Content-Type", "application/json"}});	
+							popupMessage("Status changed to in stock.");
 							mainMenu();
 						}
 					}
@@ -220,8 +264,8 @@ void Gui::update(int keycode) {
 					string surname = popupInput("Enter surname");
 					int usertype = 3;
 					do {
-					 	usertype = popupNumber("Set user type: 1-admin, 2-stocktaker, 3-user");
-					} while(usertype >3 && usertype < 1);	
+					 	usertype = popupNumber("Set user type: 1-user, 2-stocktaker");
+					} while(usertype >2 && usertype < 1);	
 					json userJson = {
 					  {"username", username},
 					  {"password", pw},
@@ -235,6 +279,33 @@ void Gui::update(int keycode) {
 						popupMessage("ok");
 					else
 						popupMessage("failed to add user.");
+				}
+				else if(currMenu == ADD_STOCK) {
+
+					string name = popupInput("Enter stock name");
+					string location = popupInput("Enter stock location");
+					
+					json stockJson = {
+					  {"name", name},
+					  {"location", location}
+					};
+					auto r = postJson("stock",stockJson);				// return ID
+					if(!r.is_null()){
+						int sid= r["id"];
+						auto r2 = postJson("add_stock_taker/"+user.getUsername()+"/"+to_string(sid));
+						if(!r2.is_null()){
+							popupMessage("added stock");
+						}
+						else
+							popupMessage("failed to add stocktaker.");
+					}
+					else
+						popupMessage("failed to add stock.");
+				}
+				else if(currMenu == ADD_BALANCE) {
+					string username = popupInput("input username");
+					addBalance(username,50);
+					mainMenu();
 				}
 			}
 		}
@@ -255,6 +326,16 @@ void Gui::update(int keycode) {
 					else
 						list(OBJ_BY_CAT_LIST);
 				}
+				else if(addObject)
+				{	
+					if(currCategoryId==0)
+						popupMessage("Please specify the category.");
+
+					else
+						addObjectPage();
+				}
+				else if(addCategory)
+					addCategoryPage();
 				else
 					list(ITEM_LIST);				
 			}
@@ -307,7 +388,8 @@ void Gui::mainMenu(){
 	tmpSelectedMenuItem=-1;
     scrollPos=0;
 	currCategoryId=0;
-
+	addCategory=false;
+	addObject=false;
 	addItem=false;
 	addItemToStock=false;
 	if(currentItem!=NULL);
@@ -319,10 +401,9 @@ void Gui::mainMenu(){
 
 	title = "Welcome " + user.getName() + " to Moose env." + to_string(user.getType());
 	footer="moose.env v.1";
-	if(user.getType() <=2){
 	   	elements.push_back(new MenuItem("Item List", ITEM_LIST));
-	   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_PAGE));
-   		elements.push_back(new MenuItem("My Stocks",MY_STOCK_LIST));
+	if(user.getType() ==2){
+	   	elements.push_back(new MenuItem("Add item to stock",ADD_STOCK_ITEM_PAGE));
    		elements.push_back(new MenuItem("Show pending orders",PENDING_LIST));
 	}	
 
@@ -331,9 +412,55 @@ void Gui::mainMenu(){
    	elements.push_back(new MenuItem("Stock list",STOCK_LIST));
    	elements.push_back(new MenuItem("View Profile",PROFILE));
 
-	if(user.getType() == 1)
+	if(user.getType() == 2) {
+   		elements.push_back(new MenuItem("Add stock",ADD_STOCK));
 		elements.push_back(new MenuItem("Add user", ADD_USER));
+   		elements.push_back(new MenuItem("My Stocks",MY_STOCK_LIST));
+		elements.push_back(new MenuItem("Add category", ADD_CATEGORY));
+		elements.push_back(new MenuItem("Add object", ADD_OBJECT));
+
+	}
 	
+}
+
+void Gui::addCategoryPage() {
+
+	string name = popupInput("Category name");
+	string description = popupInput("Category description");
+	json catJson = {
+	  {"name", name},
+	  {"description", description},
+	  {"parent_id", currCategoryId}
+	};
+	auto r = postJson("category",catJson);
+	if(!r.is_null())
+		popupMessage("ok");
+	else
+		popupMessage("failed to add category.");
+
+	addObject=false;
+	currCategoryId=0;
+	mainMenu();
+}
+
+void Gui::addObjectPage() {
+
+	string name = popupInput("Object name");
+	string description = popupInput("Object description");
+	json obJson = {
+	  {"name", name},
+	  {"description", description},
+	  {"category_id", currCategoryId}
+	};
+	auto r = postJson("object",obJson);
+	if(!r.is_null())
+		popupMessage("ok");
+	else
+		popupMessage("failed to add category.");
+
+	addCategory=false;
+	currCategoryId=0;
+	mainMenu();
 }
 
 void Gui::addItemPage(int object_no) {
@@ -391,10 +518,15 @@ void Gui::itemPage(int item_no){
 	elements.push_back(new MenuItem("Quantity:\t" + to_string(currentItem->getQuantity())));
 	elements.push_back(new MenuItem("Stock:\t" + currentItem->getStock()));
 	elements.push_back(new MenuItem("Link:\t" + currentItem->getLink()));
-	if(currentItem->getQuantity() > 0){
+	
+	if(user.getType() == 1 && currentItem->getStatus() == 1) {
+		elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE));
+	}
+
+	else if(user.getType() == 2 && currentItem->getQuantity() > 0){
 		switch(currentItem->getStatus()) {
 			case 1: elements.push_back(new MenuItem("Buy Item",BUY_ITEM_PAGE)); break;
-			case 2: elements.push_back(new MenuItem("Item ordered but not yet in stock.")); break;
+			case 2: elements.push_back(new MenuItem("Confirm item is in stock.",CONFIRM_ITEM_PAGE)); break;
 			case 3: elements.push_back(new MenuItem("Order and remove from wishlist",ORDER_ITEM_PAGE)); break;
 		}
 	}
@@ -495,8 +627,9 @@ void Gui::list(){
 	else if(currMenu == CATEGORY_LIST){
 		title = "Categories";
 		footer = "Press TAB to select current category";
-		if(addItem) title += " - SELECT ITEM CATEGORY";
-
+		if(addItem) title += " - Select item category";
+		if(addCategory) title += " - Select parent category";
+		
 	    clearMenu();
 		for (auto& item : getJson("categories/parent_id="+to_string(currCategoryId))) {
 			Category * c = new Category(item["name"],(int)item["id"],item["description"],currCategoryId);
@@ -547,6 +680,7 @@ void Gui::list(){
 
 	//REMOVE BEFORE PUBLISHMENT! ------------------------------------------------------------------------
 		elements.push_back(new MenuItem("Token:\t" + user.getToken()));
+		elements.push_back(new MenuItem("Add 50 credits",ADD_BALANCE));
 	}
 
 	if(elements.empty())
@@ -595,9 +729,8 @@ string Gui::popupInput(string text) {
     cout << "\t+------------------------------------------------+" << endl;
 	cout << "\tInput: ";
 	string input;
-	cin >> input;
+	std::getline(std::cin, input);
     std::system("clear");	   
-	list();
 	return input;
 }
 
@@ -615,7 +748,7 @@ json Gui::getJson(string content) {
 		if(r.text == ("unauthorized"))
 			currMenu = LOGIN;
 		else {
-			popupMessage(r.text);
+			popupMessage("Text:" +r.text);
 			mainMenu();
 		}
 
@@ -636,7 +769,7 @@ json Gui::postJsonNoToken(string content, json data) {
 			popupMessage("Login failed.");
 		}
 		else {
-			popupMessage(r.text);
+			popupMessage("Text:" +r.text);
 			mainMenu();	
 		}
 		json empty;	
@@ -651,9 +784,8 @@ json Gui::postJson(string content) {
 	cpr::Body{},
 	cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 				{"Content-Type", "application/json"}});
-	popupMessage(r.text);
 	if(!isJson(r)) {
-		popupMessage(r.text);
+		popupMessage("Text:" +r.text);
 		mainMenu();
 		json eJ;
 		return eJ;
@@ -739,14 +871,6 @@ void Gui::print() {
 				cout << "\033[30;47m"+limitText(elements.at(i)->getText()) +"\033[0m" << endl;
 			else
 				cout << limitText(elements.at(i)->getText()) << endl;
-
-/*
-
-			if(i==selectedMenuItem)
-				cout << "\033[30;47m"+limitText(to_string(i) + ": " + elements.at(i)->getText()) +"\033[0m" << endl;
-			else
-				cout << limitText(to_string(i) + ": " + elements.at(i)->getText()) << endl;
-*/
 		}
 		else cout << endl;
 	}

@@ -32,12 +32,17 @@ class Gui{
 	#define ITEM_PAGE "SIP"
 	#define ADD_ITEM_PAGE "AIP"
 	#define ADD_ITEM_SELECTED "AIS"
-	#define ADD_STOCK_PAGE "ASP"
+	#define ADD_STOCK_ITEM_PAGE "ASP"
 	#define OBJ_BY_CAT_LIST "OBC"
 	#define BUY_ITEM_PAGE "BIP"
 	#define ORDER_ITEM_PAGE "OIP"
+	#define CONFIRM_ITEM_PAGE "CIP"
 	#define PROFILE "PRO"
 	#define ADD_USER "ADU"
+	#define ADD_STOCK "ADS"
+	#define ADD_CATEGORY "ADC"
+	#define ADD_OBJECT "ADO"
+	#define ADD_BALANCE "ADB"
 	#define WISHLIST "PRO"
 	#define TEXT_POPUP "TPP"
 	#define NO_FUNCTION "NIL"
@@ -54,6 +59,8 @@ class Gui{
 		void list(string list_type);
 		void addItemPage(int obj_no);
 		void itemPage(int item_no);
+		void addCategoryPage();
+		void addObjectPage();
 		void updateScrollPos();
 		void addBalance(string username, int amount);
 		void withdrawBalance(string username, int amount);
@@ -78,7 +85,7 @@ class Gui{
 		int currCategoryId;
 		std::vector<Element*> elements;
 		Item* currentItem;
-		bool addItem, addItemToStock;
+		bool addItem, addItemToStock, addCategory, addObject;
 		Stock * selectedStock;
 		User user;
 };
