@@ -182,7 +182,7 @@ void Gui::update(int keycode) {
 							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 										{"Content-Type", "application/json"}});	
 							string filename = "receipt_"+to_string(currentItem->getId())+to_string(currentItem->getQuantity())+".jpeg";
-							if(r.text[0] = 'N')
+							if(r.text[0] == 'N')
 								popupMessage("Not enough balance.");
 							else {
 								std::ofstream outfile (filename);
@@ -208,7 +208,7 @@ void Gui::update(int keycode) {
 							cpr::Header{{"Authorization", "Bearer " +user.getToken()},
 										{"Content-Type", "application/json"}});	
 							popupMessage("Status changed to pending.");
-							addBalance(user.getUsername(),currentItem->getCoins() * currentItem->getQuantity());
+							//addBalance(user.getUsername(),currentItem->getCoins() * currentItem->getQuantity());
 							mainMenu();
 						}
 					}
