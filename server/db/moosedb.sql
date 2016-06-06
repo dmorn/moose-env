@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 04. Jun 2016 um 11:45
+-- Erstellungszeit: 06. Jun 2016 um 12:42
 -- Server-Version: 5.6.24
 -- PHP-Version: 5.6.8
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `category` (
   `parent_id` int(11) NOT NULL,
   `name` varchar(40) NOT NULL,
   `description` text NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 
 --
 -- Daten für Tabelle `category`
@@ -73,10 +73,12 @@ INSERT INTO `category` (`category_id`, `parent_id`, `name`, `description`) VALUE
 (1, 0, 'Transistor', 'Hi'),
 (2, 1, 'n-Channel', 'Bye'),
 (3, 1, 'p-Channel', 'sweg'),
-(4, 2, 'nnnn', 'aaaa'),
 (5, 0, 'Switch', ''),
 (6, 5, 'Push Button', 'push me'),
-(7, 5, 'Toggle Switch', 'asdasd');
+(7, 5, 'Toggle Switch', 'asdasd'),
+(8, 0, 'Led', 'Shine bright'),
+(9, 8, 'Red Led', 'Reeed'),
+(10, 8, 'Blue Led', 'Blueee');
 
 -- --------------------------------------------------------
 
@@ -95,8 +97,7 @@ CREATE TABLE IF NOT EXISTS `group` (
 --
 
 INSERT INTO `group` (`group_id`, `name`, `description`) VALUES
-(1, 'First group', 'This is le first group'),
-(2, 'Second group', 'this is le second group');
+(1, 'First group', 'This is le first group');
 
 -- --------------------------------------------------------
 
@@ -156,27 +157,6 @@ CREATE TABLE IF NOT EXISTS `item` (
   `stock_id` int(11) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
 
---
--- Daten für Tabelle `item`
---
-
-INSERT INTO `item` (`item_id`, `coins`, `status`, `quantity`, `link`, `object_id`, `stock_id`) VALUES
-(1, 5, 1, 0, '', 1, 1),
-(2, 7, 1, 3, '', 2, 1),
-(3, 4, 1, 20, '', 2, 2),
-(4, 10, 1, 123, '', 2, 3),
-(5, 15, 1, 5, '', 3, 1),
-(6, 1, 1, 4, '', 1, 1),
-(7, 7, 1, 2, '', 4, 2),
-(8, 35, 1, 123, '', 3, 1),
-(9, 3, 1, 4, '', 1, 1),
-(10, 3, 1, 11, '', 1, 1),
-(11, 3, 1, 4, '', 4, 2),
-(12, 1, 1, 1, '', 1, 1),
-(13, 5, 1, 3, '', 2, 1),
-(14, 4, 1, 3, '', 1, 1),
-(15, 7, 1, 3, '', 1, 1);
-
 -- --------------------------------------------------------
 
 --
@@ -188,7 +168,7 @@ CREATE TABLE IF NOT EXISTS `object` (
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
   `category_id` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 --
 -- Daten für Tabelle `object`
@@ -198,7 +178,10 @@ INSERT INTO `object` (`object_id`, `name`, `description`, `category_id`) VALUES
 (1, '2n2222a', 'Transistor Central Semiconductor corp. 2N2222A NPN Gehäuseart TO-18 I(C) 800 mA Emitter-Sperrspannung U(CEO) 40 V', 2),
 (2, 'BC547', 'lol', 2),
 (3, '2n3906', 'Pnp transistor', 3),
-(4, 'tact switch', 'push meee', 6);
+(4, 'tact switch', 'push meee', 6),
+(5, 'Button', 'clickediclick', 7),
+(6, '3mm Red Led', 'red led, 3mm diameter, 15mA', 9),
+(7, '3mm blue led', 'blue led, 3mm, 16mA', 10);
 
 -- --------------------------------------------------------
 
@@ -210,16 +193,14 @@ CREATE TABLE IF NOT EXISTS `stock` (
   `stock_id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `location` varchar(100) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 --
 -- Daten für Tabelle `stock`
 --
 
 INSERT INTO `stock` (`stock_id`, `name`, `location`) VALUES
-(1, 'Matthias''s warehouse', '46.779620, 11.689619'),
-(2, 'Gardena Stock 1', 'yolo'),
-(3, 'Unnamed stock', 'Unknown location');
+(1, 'Ilenias''s warehouse', '46.779620, 11.689619');
 
 -- --------------------------------------------------------
 
@@ -244,8 +225,8 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`user_id`, `username`, `password`, `email`, `name`, `surname`, `balance`, `type`, `group_id`) VALUES
-(1, 'matthias', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'matpuz81@libero.it', 'Matthias', 'Moroder', 0, 1, 1),
-(2, 'daniel', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'danielmorandini@me.com', 'Daniel', 'Morandini', 0, 2, 1);
+(1, 'ilenia', '6b1808a2ee5b1144c0853ad4beb7c717697a18f4c3292e778b91b4d23ded6f37', 'emai@mail.it', 'Ilenia', 'Fronza', 500, 1, 1),
+(2, 'matthias', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 'mamoroder@unibz.iz', 'Matthias', 'Moroder', 500, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -263,9 +244,7 @@ CREATE TABLE IF NOT EXISTS `user_stock` (
 --
 
 INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES
-(1, 1),
-(1, 2),
-(2, 3);
+(1, 1);
 
 -- --------------------------------------------------------
 
@@ -339,7 +318,7 @@ ALTER TABLE `user_stock`
 -- AUTO_INCREMENT für Tabelle `category`
 --
 ALTER TABLE `category`
-  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=11;
 --
 -- AUTO_INCREMENT für Tabelle `item`
 --
@@ -349,12 +328,12 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT für Tabelle `object`
 --
 ALTER TABLE `object`
-  MODIFY `object_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=5;
+  MODIFY `object_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
 --
 -- AUTO_INCREMENT für Tabelle `stock`
 --
 ALTER TABLE `stock`
-  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+  MODIFY `stock_id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT für Tabelle `user`
 --
