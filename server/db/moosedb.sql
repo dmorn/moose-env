@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 06. Jun 2016 um 12:42
+-- Erstellungszeit: 06. Jun 2016 um 13:29
 -- Server-Version: 5.6.24
 -- PHP-Version: 5.6.8
 
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `stock` (
 --
 
 INSERT INTO `stock` (`stock_id`, `name`, `location`) VALUES
-(1, 'Ilenias''s warehouse', '46.779620, 11.689619');
+(1, 'Matthias''s warehouse', '46.779620, 11.689619');
 
 -- --------------------------------------------------------
 
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS `user_stock` (
 --
 
 INSERT INTO `user_stock` (`user_id`, `stock_id`) VALUES
-(1, 1);
+(2, 1);
 
 -- --------------------------------------------------------
 
