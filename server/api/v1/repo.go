@@ -242,7 +242,7 @@ func GetUserByUsername(u string) (*User, error) {
 
 func CheckUserIsStockTaker(user *User) ([]int, error) {
 
-	query := fmt.Sprintf("select user_id from user_stock where user_id = %d", user.Id)
+	query := fmt.Sprintf("select stock_id from user_stock where user_id = %d", user.Id)
 
 	if rows, err := db.Query(query); err != nil {
 		return nil, err
@@ -668,7 +668,7 @@ func WithdrawAmountToUserBalance(user *User, amount int) error {
 
 	balance := user.Balance - amount
 	query := fmt.
-		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d", balance, user.Id)
+		Sprintf("UPDATE `user` SET balance=%d WHERE user_id=%d;", balance, user.Id)
 
 	_, err := db.Query(query)
 	return err
@@ -677,7 +677,7 @@ func WithdrawAmountToUserBalance(user *User, amount int) error {
 func UpdateItemStatusToPending(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET `status`=2 WHERE `status`=3 AND `item_id`=%d", item.Id)
+		Sprintf("UPDATE `item` SET `status`=2 WHERE `status`=3 AND item_id=%d;", item.Id)
 
 	_, err := db.Query(query)
 	return err
@@ -686,7 +686,7 @@ func UpdateItemStatusToPending(item *Item) error {
 func PutItemIntoStock(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET `status`=1 WHERE `status`=2 AND `item_id`=%d", item.Id)
+		Sprintf("UPDATE `item` SET `status`=1 WHERE `status`=2 AND `item_id`=%d;", item.Id)
 	_, err := db.Query(query)
 
 	return err
