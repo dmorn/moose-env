@@ -677,7 +677,7 @@ func WithdrawAmountToUserBalance(user *User, amount int) error {
 func UpdateItemStatusToPending(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET status=2 WHERE status=3 AND stock_id=%d AND item_id=%d", item.StockId, item.Id)
+		Sprintf("UPDATE `item` SET `status`=2 WHERE `status`=3 AND `item_id`=%d", item.Id)
 
 	_, err := db.Query(query)
 	return err
@@ -686,7 +686,7 @@ func UpdateItemStatusToPending(item *Item) error {
 func PutItemIntoStock(item *Item) error {
 
 	query := fmt.
-		Sprintf("UPDATE `item` SET status=1 WHERE status=2 AND stock_id=%d AND item_id=%d", item.StockId, item.Id)
+		Sprintf("UPDATE `item` SET `status`=1 WHERE `status`=2 AND `item_id`=%d", item.Id)
 	_, err := db.Query(query)
 
 	return err
