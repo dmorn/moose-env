@@ -281,7 +281,7 @@ void Gui::update(int keycode) {
 						popupMessage("failed to add user.");
 				}
 				else if(currMenu == ADD_STOCK) {
-
+                  
 					string name = popupInput("Enter stock name");
 					string location = popupInput("Enter stock location");
 					
@@ -303,8 +303,12 @@ void Gui::update(int keycode) {
 						popupMessage("failed to add stock.");
 				}
 				else if(currMenu == ADD_BALANCE) {
-					string username = popupInput("input username");
-					addBalance(username,50);
+					                           
+                    popupInput("input username");                    
+                    string username = popupInput("input username");
+                    string balance = popupInput("input amount");
+                    int b = stoi(balance);
+					addBalance(username,b);
 					mainMenu();
 				}
 			}
@@ -680,7 +684,7 @@ void Gui::list(){
 
 	//REMOVE BEFORE PUBLISHMENT! ------------------------------------------------------------------------
 		elements.push_back(new MenuItem("Token:\t" + user.getToken()));
-		elements.push_back(new MenuItem("Add 50 credits",ADD_BALANCE));
+		elements.push_back(new MenuItem("Add credits to user",ADD_BALANCE));
 	}
 
 	if(elements.empty())
